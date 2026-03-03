@@ -44,23 +44,6 @@
     --color-feedback-error: #dc2626;
 }
 
-@media (prefers-color-scheme: dark) {
-     :root {
-        /* ===== Neutral ===== */
-        --color-neutral-900: #1B0202;
-        --color-neutral-800: #78604E;
-        --color-neutral-700: #907660;
-        /* ===== Brand ===== */
-        --color-brand-500: #B18B64;
-        --color-brand-400: #D5AE94;
-        --color-brand-300: #F5CCB2;
-        --color-brand-200: #E7EDCE;
-        /* ===== Fontes ===== */
-        --font-sans: "Inter", sans-serif;
-        --font-mono: "Fira Code", monospace;
-    }
-}
-
 body {
     background: var(--color-background);
     color: var(--color-text-primary);
