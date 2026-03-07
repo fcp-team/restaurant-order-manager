@@ -31,6 +31,7 @@
     /* Botão Action */
     --color-button-action: var(--color-brand-400);
     --color-button-action-hover: var(--color-brand-300);
+    --color-button-action-border: var(--color-neutral-900);
     /* Botão Config */
     --color-button-config: #E8E8E8;
     --color-button-config-border: var(--color-neutral-900);
