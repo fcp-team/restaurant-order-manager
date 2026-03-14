@@ -26,7 +26,7 @@ export default function CardPedidoCozinha({pedido}: CardCozinhaProps){
             <h3 className="text-4xl">Pedido n°{pedido.numeroPedido} - Mesa {pedido.numeroMesa}</h3>
             <p className="pt-2">{pedido.data}</p>
             <ul className="text-2xl list-disc list-inside m-3">
-                {pedido.itens?.map((item: string, index: number) => (
+                {itens?.map((item: string, index: number) => (
                     <li key={index}>{item}</li>
                 ))}
             </ul>
