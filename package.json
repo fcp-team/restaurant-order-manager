@@ -8,15 +8,19 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "ws": "node src/server/ws-server.ts"
+    "ws": "node src/server/ws-server.ts",
   },
   "dependencies": {
     "@types/ws": "^8.18.1",
+    "@tailwindcss/postcss": "^4.2.1",
+    "autoprefixer": "^10.4.27",
     "mysql2": "^3.18.1",
     "next": "16.1.6",
+    "postcss": "^8.5.8",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "ws": "^8.19.0"
+    "ws": "^8.19.0",
+    "tailwindcss": "^4.2.1",
   },
   "devDependencies": {
     "@types/node": "^20",
