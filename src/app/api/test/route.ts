@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
 import { RowDataPacket } from "mysql2"
 import pool from "@/lib/db"
-// import OrderService from "@/server/services/order.service"
+
+import OrderService from "@/server/services/order.service"
+import { AuthorizationService } from "@/server/services/authorization.service"
 import { OrderRepository } from "@/server/repositories/order.repository"
 
 interface User extends RowDataPacket {
@@ -12,11 +14,16 @@ interface User extends RowDataPacket {
 
 export async function GET() {
   try {
-    const orderRepo = new OrderRepository()
-    // const orders = await orderRepo.listOrders()
-    const order = await orderRepo.getOrder("1")
+    const repositorioPedido = new OrderRepository()
+    const orders = await repositorioPedido.listarPedido()
+    const pedido = await repositorioPedido.buscarPedido("1")
+    const SerivcoAutorizacao = new AuthorizationService()
+   
+    const orderService = new OrderService(repositorioPedido, SerivcoAutorizacao)
 
-    return NextResponse.json(order)
+
+
+    return NextResponse.json(pedido)
 
   } catch (reason) {
     console.error(reason)
@@ -26,4 +33,5 @@ export async function GET() {
       {status: 500}
     )
   }
+ 
 }
