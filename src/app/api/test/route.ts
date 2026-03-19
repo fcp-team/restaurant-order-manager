@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { RowDataPacket } from "mysql2"
 import pool from "@/lib/db"
 
-import OrderService from "@/server/services/order.service"
+import PedidoService from "@/server/services/order.service"
 import { AuthorizationService } from "@/server/services/authorization.service"
 import { OrderRepository } from "@/server/repositories/order.repository"
 
@@ -18,8 +18,8 @@ export async function GET() {
     const orders = await repositorioPedido.listarPedido()
     const pedido = await repositorioPedido.buscarPedido("1")
     const SerivcoAutorizacao = new AuthorizationService()
-   
-    const orderService = new OrderService(repositorioPedido, SerivcoAutorizacao)
+
+    const orderService = new PedidoService(repositorioPedido, SerivcoAutorizacao)
 
 
 
@@ -27,11 +27,11 @@ export async function GET() {
 
   } catch (reason) {
     console.error(reason)
-    
+
     return NextResponse.json(
-      {error: "Erro ao buscar pedidos"},
-      {status: 500}
+      { error: "Erro ao buscar pedidos" },
+      { status: 500 }
     )
   }
- 
+
 }

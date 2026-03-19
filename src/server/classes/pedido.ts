@@ -14,9 +14,13 @@ export class Pedido {
 
   constructor(
     private readonly id: number,
-    private readonly numeroMesa: number,
+    private numeroMesa: number,
     private readonly criadoEm: Date = new Date()
   ) {}
+
+  get Id() {
+    return this.id
+  }
 
   get Itens() {
     return [...this.itens];
