@@ -13,13 +13,14 @@ interface Order extends RowDataPacket {
 }
 
 interface IOrderRepository {
-  // save(order: Order): Promise<void>
   buscarPedido(id: string): Promise<Order | null>
   listarPedido(): Promise<Order[]>
-  
-
-  // listOrdersByStatus(status: OrderStatus): Promise<Order[]>
-  // listOrdersByPeriod(start: Date, end: Date): Promise<Order[]>
+  criarPedido(table: number): Promise<any>
+  adicionarItem(orderId: number, menuItemId: number, quantity: number): Promise<void>
+  removerItem(orderId: number, menuItemId: number): Promise<void>
+  listarPorStatus(status: OrderStatus): Promise<Order[]>
+  listarPorPeriodo(start: Date, end: Date): Promise<Order[]>
+  atualizarStatusPedido(id: string, status: OrderStatus): Promise<void>
 }
 
 export class OrderRepository implements IOrderRepository {
@@ -50,11 +51,12 @@ export class OrderRepository implements IOrderRepository {
   )
 
 }
-  async removerItem(orderId: number, menuItemId: number, quantity: number ){
+  async removerItem(orderId: number, menuItemId: number) {
     await pool.query(
-       "DELETE FROM OrderItems (order_id, menu_item_id, quantity) VALUES (?, ?, ?)",
-    [orderId, menuItemId]
-    )}
+      "DELETE FROM OrderItems WHERE order_id = ? AND menu_item_id = ?",
+      [orderId, menuItemId]
+    )
+  }
 
   async listarPorStatus(status: string): Promise<Order[]> {
   const [rows] = await pool.query<Order[]>(
@@ -67,6 +69,16 @@ export class OrderRepository implements IOrderRepository {
   await pool.query(
     "UPDATE Orders SET status = ? WHERE id_order = ?",
     [status, id])}
-  
 
+    
+  async listarPorPeriodo(start: Date, end: Date): Promise<Order[]> {
+  const [rows] = await pool.query<Order[]>(
+    "SELECT * FROM Orders WHERE createdAt BETWEEN ? AND ?",
+    [start, end]
+  )
+
+  return rows
+}
+  
+  // implementação final do OrderRepository conforme diagrama
 }
