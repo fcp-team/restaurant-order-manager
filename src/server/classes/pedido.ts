@@ -7,15 +7,15 @@ export enum StatusPedido {
 }
 
 export class Pedido {
-  private itens: ItemPedido[] = [];
-  private status: StatusPedido = StatusPedido.ABERTO;
-  private fechadoEm?: Date;
-  private pagamentoId?: number;
-
+  private readonly criadoEm: Date = new Date()
+  private status: StatusPedido = StatusPedido.ABERTO
+  private fechadoEm?: Date
+  private pagamentoId?: number
+  
   constructor(
     private readonly id: number,
     private numeroMesa: number,
-    private readonly criadoEm: Date = new Date()
+    private itens: ItemPedido[]
   ) {}
 
   get Id() {
@@ -27,15 +27,13 @@ export class Pedido {
   }
 
   adicionarItem(item: ItemPedido) {
-    this.assegurarPedidoAberto();
-
-    this.itens.push(item);
+    this.assegurarPedidoAberto()
+    this.itens.push(item)
   }
 
-  removerItem(itemId: number) {
-    this.assegurarPedidoAberto();
-
-    this.itens = this.itens.filter(i => i.Id !== itemId);
+  removerItem(idItem: number) {
+    this.assegurarPedidoAberto()
+    this.itens = this.itens.filter(i => i.Id !== idItem);
   }
 
   acrescentarItem(itemId: number) {

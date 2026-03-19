@@ -5,6 +5,8 @@ export enum StatusItemPedido {
 }
 
 export class ItemPedido {
+  private status: StatusItemPedido = StatusItemPedido.PENDENTE
+
   constructor(
     private readonly id: number,
     private readonly itemMenuId: number,
@@ -12,7 +14,6 @@ export class ItemPedido {
     private quantidade: number,
     private readonly precoUnitario: number,
     private observacao?: string,
-    private status: StatusItemPedido = StatusItemPedido.PENDENTE
   ) {}
 
   get Id() {
@@ -37,9 +38,8 @@ export class ItemPedido {
 
   reduzir(): void {
     if (this.quantidade <= 1) {
-      throw new Error("Quantity cannot be less than 1");
+      throw new Error("Quantidade não pode ser menor que 1");
     }
-
     this.quantidade--;
   }
 

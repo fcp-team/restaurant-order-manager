@@ -1,29 +1,35 @@
 import { NextResponse } from "next/server"
-import { RowDataPacket } from "mysql2"
-import pool from "@/lib/db"
+import { InMemoryRepositorioPedido } from "@/server/repositories/pedido.repositorio"
+import ServicoPedido from "@/server/services/pedido.servico"
 
-import PedidoService from "@/server/services/order.service"
-import { AuthorizationService } from "@/server/services/authorization.service"
-import { OrderRepository } from "@/server/repositories/order.repository"
+const service = new ServicoPedido(
+  new InMemoryRepositorioPedido()
+)
 
-interface User extends RowDataPacket {
-  id: number
-  name: string
-  email: string
+const pedidoPayload = {
+  numeroMesa: 1,
+  itens: [
+    {
+      idItemMenu: "1",
+      quantidade: 2,
+    },
+    {
+      idItemMenu: "15",
+      quantidade: 1,
+      observacao: "Sem cebola"
+    },
+  ]
 }
 
 export async function GET() {
   try {
-    const repositorioPedido = new OrderRepository()
-    const orders = await repositorioPedido.listarPedido()
-    const pedido = await repositorioPedido.buscarPedido("1")
-    const SerivcoAutorizacao = new AuthorizationService()
+    await service.criarPedido(pedidoPayload)
+    let pedido = await service.buscarPedido("1")
 
-    const orderService = new PedidoService(repositorioPedido, SerivcoAutorizacao)
+    await service.adicionarItem(String(pedido.Id), "1", 2)
+    pedido = await service.buscarPedido("1")
 
-
-
-    return NextResponse.json(pedido)
+    return NextResponse.json({ pedido })
 
   } catch (reason) {
     console.error(reason)
