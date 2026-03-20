@@ -22,7 +22,7 @@ export default class ServicoPedido {
   constructor(
     private repositorio: IRepositorioPedido,
     // private autorizacao: ServicoAutorizacao
-  ) {}
+  ) { }
 
   async criarPedido(payload: NovoPedidoPayload): Promise<Pedido> {
     const { numeroMesa, itens } = payload
@@ -56,11 +56,27 @@ export default class ServicoPedido {
     return item
   }
 
-  async removerItem(idPedido: string, idItemMenu: string, quantidade: number): Promise<ItemPedido> {
-    const pedido = await this.repositorio.removerItem(idPedido, idItemMenu, quantidade)
-    if (!pedido) throw new Error('Falha ao remover item')
+  async acrescentarItem(idPedido: string, idItem: string, quantidade: number): Promise<ItemPedido> {
+    if (quantidade <= 0) throw new Error("Quantidade inválida")
+    const item = await this.repositorio.acrescentarItem(idPedido, idItem, quantidade)
+    if (!item) throw new Error('Falha ao adicionar item')
 
-    return pedido
+    return item
+  }
+
+  async removerItem(idPedido: string, idItemMenu: string, quantidade: number): Promise<ItemPedido> {
+    const item = await this.repositorio.removerItem(idPedido, idItemMenu, quantidade)
+    if (!item) throw new Error('Falha ao remover item')
+
+    return item
+  }
+
+  async reduzirItem(idPedido: string, idItem: string, quantidade: number): Promise<ItemPedido> {
+    if (quantidade <= 0) throw new Error("Quantidade inválida")
+    const item = await this.repositorio.reduzirItem(idPedido, idItem, quantidade)
+    if (!item) throw new Error('Falha ao adicionar item')
+
+    return item
   }
 
   async listarPorStatus(status: StatusPedido): Promise<Pedido[]> {

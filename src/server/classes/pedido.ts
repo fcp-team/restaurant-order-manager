@@ -23,7 +23,15 @@ export class Pedido {
   }
 
   get Itens() {
-    return [...this.itens];
+    return [...this.itens]
+  }
+
+  get Status() {
+    return this.status
+  }
+
+  get CriadoEm() {
+    return this.criadoEm
   }
 
   adicionarItem(item: ItemPedido) {
@@ -82,7 +90,7 @@ export class Pedido {
     this.fechadoEm = new Date();
   }
 
-  private pegarItem(idItem: string): ItemPedido {
+  pegarItem(idItem: string): ItemPedido {
     const item = this.itens.find(i => i.Id === idItem);
 
     if (!item) {

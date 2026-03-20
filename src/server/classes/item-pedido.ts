@@ -9,7 +9,7 @@ export class ItemPedido {
 
   constructor(
     private readonly id: string,
-    private readonly itemMenuId: string,
+    private readonly idItemMenu: string,
     private readonly nome: string,
     private quantidade: number,
     private readonly precoUnitario: number,
@@ -18,6 +18,10 @@ export class ItemPedido {
 
   get Id() {
     return this.id;
+  }
+
+  get IdItemMenu() {
+    return this.idItemMenu
   }
 
   get Status() {
