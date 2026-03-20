@@ -15,9 +15,16 @@ export default function CardPedidoCozinha({pedido}: CardCozinhaProps){
             status: "Finalizado"
         }))
 
-        setItens(novosItens)
+        setItens(novosItens);
 
-         fetch("/api/pedido", {method: 'POST',headers: {"Content-Type": 'application/json'}, body: JSON.stringify({novosItens})})
+        const payload = {
+        itens: novosItens.map((item: any) => ({
+            idItemPedido: item.id, 
+            novoStatus: item.status
+        }))
+        };
+
+         fetch("/api/pedido/itens/atualizar-status", {method: 'PATCH',headers: {"Content-Type": 'application/json'}, body: JSON.stringify(payload)})
       
     }
 
