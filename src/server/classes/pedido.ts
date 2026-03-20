@@ -10,10 +10,10 @@ export class Pedido {
   private readonly criadoEm: Date = new Date()
   private status: StatusPedido = StatusPedido.ABERTO
   private fechadoEm?: Date
-  private pagamentoId?: number
+  private idPagamento?: string
   
   constructor(
-    private readonly id: number,
+    private readonly id: string,
     private numeroMesa: number,
     private itens: ItemPedido[]
   ) {}
@@ -31,26 +31,26 @@ export class Pedido {
     this.itens.push(item)
   }
 
-  removerItem(idItem: number) {
+  removerItem(idItem: string) {
     this.assegurarPedidoAberto()
     this.itens = this.itens.filter(i => i.Id !== idItem);
   }
 
-  acrescentarItem(itemId: number) {
+  acrescentarItem(idItem: string) {
     this.assegurarPedidoAberto();
 
-    const item = this.pegarItem(itemId);
+    const item = this.pegarItem(idItem);
     item.acrescentar();
   }
 
-  reduzirItem(itemId: number) {
+  reduzirItem(itemId: string) {
     this.assegurarPedidoAberto();
 
     const item = this.pegarItem(itemId);
     item.reduzir();
   }
 
-  alterarItemStatus(itemId: number, status: StatusItemPedido) {
+  alterarItemStatus(itemId: string, status: StatusItemPedido) {
     const item = this.pegarItem(itemId);
     item.alterarStatus(status);
   }
@@ -65,10 +65,10 @@ export class Pedido {
       .reduce((ac, valor) => ac + valor, 0);
   }
 
-  fechar(pagamentoId: number) {
+  fechar(idPagamento: string) {
     this.assegurarPedidoAberto();
 
-    this.pagamentoId = pagamentoId;
+    this.idPagamento = idPagamento;
     this.fechadoEm = new Date();
     this.status = StatusPedido.FECHADO;
   }
@@ -82,8 +82,8 @@ export class Pedido {
     this.fechadoEm = new Date();
   }
 
-  private pegarItem(itemId: number): ItemPedido {
-    const item = this.itens.find(i => i.Id === itemId);
+  private pegarItem(idItem: string): ItemPedido {
+    const item = this.itens.find(i => i.Id === idItem);
 
     if (!item) {
       throw new Error("Item não encontrado");

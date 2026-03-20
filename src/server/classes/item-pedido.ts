@@ -8,8 +8,8 @@ export class ItemPedido {
   private status: StatusItemPedido = StatusItemPedido.PENDENTE
 
   constructor(
-    private readonly id: number,
-    private readonly itemMenuId: number,
+    private readonly id: string,
+    private readonly itemMenuId: string,
     private readonly nome: string,
     private quantidade: number,
     private readonly precoUnitario: number,

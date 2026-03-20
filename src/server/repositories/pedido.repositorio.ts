@@ -37,11 +37,11 @@ export class InMemoryRepositorioPedido implements IRepositorioPedido {
   private nextItemId = 1
 
   async criarPedido(payload: NovoPedidoPayload): Promise<Pedido> {
-    const pedidoId = this.nextPedidoId++
+    const pedidoId = String(this.nextPedidoId++)
 
     const itens: ItemPedido[] = (payload.itens || []).map(i => {
-      const itemId = this.nextItemId++
-      const menuIdNum = Number(i.idItemMenu) || 0
+      const itemId = String(this.nextItemId++)
+      const menuIdNum = i.idItemMenu || "0"
       const nome = `Item ${i.idItemMenu}`
       const precoUnitario = 0
 
@@ -87,8 +87,8 @@ export class InMemoryRepositorioPedido implements IRepositorioPedido {
     const entry = this.pedidos.get(idPedido)
     if (!entry) throw new Error("Pedido não encontrado")
 
-    const itemId = this.nextItemId++
-    const menuIdNum = Number(idItemMenu) || 0
+    const itemId = String(this.nextItemId++)
+    const menuIdNum = idItemMenu || "0"
     const nome = `Item ${idItemMenu}`
     const precoUnitario = 0
 
@@ -103,7 +103,7 @@ export class InMemoryRepositorioPedido implements IRepositorioPedido {
     const entry = this.pedidos.get(idPedido)
     if (!entry) throw new Error("Pedido não encontrado")
 
-    const itemId = Number(idItemMenu)
+    const itemId = idItemMenu
     if (!itemId) throw new Error("ID de item inválido")
 
     // tentar localizar o item antes de remover
@@ -142,7 +142,7 @@ export class InMemoryRepositorioPedido implements IRepositorioPedido {
     const entry = this.pedidos.get(idPedido)
     if (!entry) throw new Error("Pedido não encontrado")
 
-    const itemId = Number(idItem)
+    const itemId = idItem
     if (!itemId) throw new Error("ID de item inválido")
 
     entry.pedido.alterarItemStatus(itemId, status)

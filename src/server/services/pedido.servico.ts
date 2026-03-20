@@ -79,7 +79,7 @@ export default class ServicoPedido {
   async fecharPedido(id: string) {
     // if (!this.autorizacao.autorizar()) throw new Error("Não autorizado")
     const pedido = await this.buscarPedido(id)
-    pedido.fechar(0)
+    pedido.fechar("0")
 
     await this.repositorio.atualizarStatusPedido(id, StatusPedido.FECHADO)
   }
