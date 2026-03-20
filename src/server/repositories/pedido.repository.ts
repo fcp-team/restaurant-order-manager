@@ -1,47 +1,143 @@
 import pool from "@/lib/db"
 import { RowDataPacket } from "mysql2"
+import { Pedido, StatusPedido } from "../classes/pedido"
+import { ItemPedido, StatusItemPedido } from "../classes/item-pedido"
 
-export type OrderStatus = "aberto" | "fechado" | "cancelado"
 
-interface Order extends RowDataPacket {
-  id: string
-  table: number
-  items: string[]
-  total: number
+interface PedidoRow extends RowDataPacket {
+  id_order: number
+  table_number: number
   createdAt: Date
-  status: OrderStatus
 }
 
-interface IOrderRepository {
-  buscarPedido(id: string): Promise<Order | null>
-  listarPedido(): Promise<Order[]>
+interface IPedidoRepository {
+  buscarPedido(id: string): Promise<Pedido | null>
+  listarPedido(): Promise<Pedido[]>
   criarPedido(table: number): Promise<any>
   adicionarItem(orderId: number, menuItemId: number, quantity: number): Promise<void>
   removerItem(orderId: number, menuItemId: number): Promise<void>
-  listarPorStatus(status: OrderStatus): Promise<Order[]>
-  listarPorPeriodo(start: Date, end: Date): Promise<Order[]>
-  atualizarStatusPedido(id: string, status: OrderStatus): Promise<void>
+  listarPorStatus(status: StatusPedido): Promise<Pedido[]>
+  listarPorPeriodo(start: Date, end: Date): Promise<Pedido[]>
+  atualizarStatusPedido(id: string, status: StatusPedido): Promise<void>
 }
 
-export class OrderRepository implements IOrderRepository {
-  async buscarPedido(id: string): Promise<Order | null> {
-    const [rows] = await pool.query<Order[]>("SELECT * FROM Orders WHERE id_order = ?", [id])
-    if (rows.length === 0) return null
-    return rows[0]
-  }
+export class PedidoRepository implements IPedidoRepository {
 
-  async listarPedido(): Promise<Order[]> {
-    const [rows] = await pool.query<Order[]>("SELECT * FROM Orders")
-    return rows
-  }
-  async criarPedido(table: number) {
-    const [result] = await pool.query(
-      "INSERT INTO Orders (table_number, total, createdAt, status) VALUES (?, ?, NOW(), ?)",
-      [table, 0, "aberto"]
+
+  async buscarPedido(id: string): Promise<Pedido | null> {
+  const [rows] = await pool.query<any[]>(
+    "SELECT * FROM Orders WHERE id_order = ?",
+    [id]
+  )
+
+  if (rows.length === 0) return null
+
+  const data = rows[0]
+
+  const pedido = new Pedido(
+    data.id_order,
+    data.table_number,
+    data.createdAt
+  )
+
+  // buscar itens do pedido
+  const [items] = await pool.query<any[]>(
+    `SELECT 
+        oi.id,
+        oi.menu_item_id,
+        oi.quantity,
+        oi.status,
+        m.name,
+        m.price
+     FROM OrderItems oi
+     JOIN MenuItems m ON m.id = oi.menu_item_id
+     WHERE oi.order_id = ?`,
+    [id]
+  )
+
+  //mapear itens
+  items.forEach(item => {
+    const itemPedido = new ItemPedido(
+      item.id,
+      item.menu_item_id,
+      item.name,
+      item.quantity,
+      item.price,
+      undefined, 
+      item.status as StatusItemPedido
+    )
+      
     )
 
-    return result
+    pedido.adicionarItem(itemPedido)
+  })
+
+  return pedido
+}
+
+ async listarPedido(): Promise<Pedido[]> {
+  const [rows] = await pool.query<any[]>("SELECT * FROM Orders")
+
+  const pedidos: Pedido[] = []
+
+  for (const data of rows) {
+    const pedido = new Pedido(
+      data.id_order,
+      data.table_number,
+      data.createdAt
+    )
+
+    // buscar itens desse pedido
+    const [items] = await pool.query<any[]>(
+      `SELECT 
+          oi.id,
+          oi.menu_item_id,
+          oi.quantity,
+          oi.status,
+          m.name,
+          m.price
+       FROM OrderItems oi
+       JOIN MenuItems m ON m.id = oi.menu_item_id
+       WHERE oi.order_id = ?`,
+      [data.id_order]
+    )
+
+    items.forEach(item => {
+      const itemPedido = new ItemPedido(
+        item.id,
+        item.menu_item_id,
+        item.name,
+        item.quantity,
+        item.price,
+        undefined,
+        item.status
+      )
+
+      pedido.adicionarItem(itemPedido)
+    })
+
+    pedidos.push(pedido)
   }
+
+  return pedidos
+}
+
+ async criarPedido(table: number): Promise<Pedido> {
+  const [result]: any = await pool.query(
+    "INSERT INTO Orders (table_number, total, createdAt, status) VALUES (?, ?, NOW(), ?)",
+    [table, 0, "ABERTO"]
+  )
+
+  const id = result.insertId
+
+  const pedido = new Pedido(
+    id,
+    table,
+    new Date()
+  )
+
+  return pedido
+}
   
   async adicionarItem(orderId: number, menuItemId: number, quantity: number) {
 
@@ -58,27 +154,39 @@ export class OrderRepository implements IOrderRepository {
     )
   }
 
-  async listarPorStatus(status: string): Promise<Order[]> {
-  const [rows] = await pool.query<Order[]>(
+  async listarPorStatus(status: string): Promise<Pedido[]> {
+  const [rows] = await pool.query<any[]>(
     "SELECT * FROM Orders WHERE status = ?",
-    [status])
+    [status]
+  )
 
-  return rows}
+  return rows.map(data =>
+    new Pedido(
+      data.id_order,
+      data.table_number,
+      data.createdAt
+    )
+  )
+}
    
-  async atualizarStatusPedido(id: string, status: OrderStatus): Promise<void> {
+ async atualizarStatusPedido(id: string, status: StatusPedido): Promise<void> {
   await pool.query(
     "UPDATE Orders SET status = ? WHERE id_order = ?",
-    [status, id])}
-
+    [status, id]
+  )
+}
     
-  async listarPorPeriodo(start: Date, end: Date): Promise<Order[]> {
-  const [rows] = await pool.query<Order[]>(
+  async listarPorPeriodo(start: Date, end: Date): Promise<Pedido[]> {
+  const [rows] = await pool.query<any[]>(
     "SELECT * FROM Orders WHERE createdAt BETWEEN ? AND ?",
     [start, end]
   )
 
-  return rows
-}
-  
-  // implementação final do OrderRepository conforme diagrama
-}
+  return rows.map(data =>
+    new Pedido(
+      data.id_order,
+      data.table_number,
+      data.createdAt
+    )
+  )
+} }

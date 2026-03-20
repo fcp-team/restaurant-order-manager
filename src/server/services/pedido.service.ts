@@ -1,13 +1,13 @@
-import { OrderRepository } from "../repositories/order.repository"
+import { PedidoRepository } from "../repositories/pedido.repository"
 import { AuthorizationService } from "./authorization.service"
-import { OrderStatus } from "../repositories/order.repository"
+import { OrderStatus } from "../repositories/pedido.repository"
 
 export default class OrderService {
 
-  repository: OrderRepository
+  repository: PedidoRepository
   authorization: AuthorizationService
 
-  constructor(repositorio: OrderRepository, authorizacao: AuthorizationService) {
+  constructor(repositorio: PedidoRepository, authorizacao: AuthorizationService) {
     this.repository = repositorio
     this.authorization = authorizacao}
 
@@ -36,8 +36,8 @@ export default class OrderService {
 
      await this.repository.adicionarItem(orderId, menuItemId, quantity)}
 
-    async removerItem(orderId: number, menuItemId: number, quantity: number){
-      await this.repository.removerItem(orderId, menuItemId, quantity)}
+    async removerItem(orderId: number, menuItemId: number, ){
+      await this.repository.removerItem(orderId, menuItemId, )}
     
     async listarPorStatus(status:OrderStatus){
       const orders =await this.repository.listarPorStatus(status)
