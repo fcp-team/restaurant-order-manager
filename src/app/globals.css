@@ -1,42 +1,56 @@
+@import "tailwindcss";
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+    /* ===== Neutral ===== */
+    --color-neutral-900: #1B0202;
+    --color-neutral-800: #78604E;
+    --color-neutral-700: #907660;
+    /* ===== Brand ===== */
+    --color-brand-500: #B18B64;
+    --color-brand-400: #D5AE94;
+    --color-brand-300: #F5CCB2;
+    --color-brand-200: #E7EDCE;
+    /* ===== Fontes ===== */
+    --font-sans: "Inter", sans-serif;
+    --font-mono: "Fira Code", monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme inline {
+    /* Background / superfície */
+ feat/pagina-garcom
+    --color-background: #e8e8e8;
+
+    --color-background: #E8E8E8;
+ master
+    --color-surface: var(--color-brand-500);
+    --color-surface-border: var(--color-neutral-900);
+    /* Textos */
+    --color-text-primary: #000000;
+    --color-text-inverse: #ffffff;
+    --color-text-secondary: #555555;
+    --color-text-highlight: var(--color-neutral-900);
+    /* Ações / botões */
+    /* Botão Auth */
+    --color-button-auth: var(--color-neutral-800);
+    --color-button-auth-hover: var(--color-neutral-700);
+    /* Botão Action */
+    --color-button-action: var(--color-brand-400);
+    --color-button-action-hover: var(--color-brand-300);
+    --color-button-action-border: var(--color-neutral-900);
+    /* Botão Config */
+    --color-button-config: #E8E8E8;
+    --color-button-config-border: var(--color-neutral-900);
+    --color-button-config-hover: var(--color-neutral-900);
+    /* Botão Danger */
+    --color-button-danger: #E8E8E8;
+    --color-button-danger-border: #B30505;
+    --color-button-danger-hover: #B30505;
+    /* Feedback / alertas */
+    --color-feedback-success: #16a34a;
+    --color-feedback-error: #dc2626;
 }
 
-html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+    background: var(--color-background);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
 }
