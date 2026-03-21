@@ -5,19 +5,23 @@ export enum StatusItemPedido {
 }
 
 export class ItemPedido {
-  private status: StatusItemPedido = StatusItemPedido.PENDENTE
-
+  
   constructor(
-    private readonly id: string,
+    private id: string,
     private readonly idItemMenu: string,
     private readonly nome: string,
     private quantidade: number,
     private readonly precoUnitario: number,
     private observacao?: string,
+    private status: StatusItemPedido = StatusItemPedido.PENDENTE
   ) {}
 
   get Id() {
     return this.id;
+  }
+
+  set Id(valor: string) {
+    this.id = valor
   }
 
   get IdItemMenu() {

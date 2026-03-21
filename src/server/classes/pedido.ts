@@ -8,14 +8,14 @@ export enum StatusPedido {
 
 export class Pedido {
   private readonly criadoEm: Date = new Date()
-  private status: StatusPedido = StatusPedido.ABERTO
-  private fechadoEm?: Date
   private idPagamento?: string
   
   constructor(
-    private readonly id: string,
+    private readonly id: string | null,
     private numeroMesa: number,
-    private itens: ItemPedido[]
+    private itens: ItemPedido[],
+    private status: StatusPedido = StatusPedido.ABERTO,
+    private fechadoEm?: Date
   ) {}
 
   get Id() {

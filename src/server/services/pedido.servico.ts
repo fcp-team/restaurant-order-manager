@@ -35,10 +35,10 @@ export default class ServicoPedido {
       throw new Error("O pedido deve conter itens válidos")
     }
 
-    const pedido = await this.repositorio.criarPedido(payload)
-    if (!pedido) throw new Error("Falha ao criar pedido no repositório")
+    const result = await this.repositorio.criarPedido(payload)
+    if (!result) throw new Error("Falha ao criar pedido no repositório")
 
-    return pedido
+    return result
   }
 
   async buscarPedido(id: string): Promise<Pedido> {
@@ -80,7 +80,7 @@ export default class ServicoPedido {
   }
 
   async listarPorStatus(status: StatusPedido): Promise<Pedido[]> {
-    const pedidos = await this.repositorio.listPedidosPorStatus(status)
+    const pedidos = await this.repositorio.listarPorStatus(status)
     return pedidos
   }
 
