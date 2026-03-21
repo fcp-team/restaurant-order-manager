@@ -7,13 +7,13 @@ interface ServicoAutorizacao {
   autorizar(): boolean
 }
 
-type NovoPedidoItemPayload = {
+export type NovoPedidoItemPayload = {
   idItemMenu: string
   quantidade: number
   observacao?: string
 }
 
-type NovoPedidoPayload = {
+export type NovoPedidoPayload = {
   numeroMesa: number
   itens: NovoPedidoItemPayload[]
 }
