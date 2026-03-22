@@ -16,11 +16,7 @@
 
 @theme inline {
     /* Background / superfície */
- feat/pagina-garcom
-    --color-background: #e8e8e8;
-
     --color-background: #E8E8E8;
- master
     --color-surface: var(--color-brand-500);
     --color-surface-border: var(--color-neutral-900);
     /* Textos */
