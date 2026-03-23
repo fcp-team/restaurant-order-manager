@@ -1,7 +1,7 @@
 "use client"
 
 import Header from "@/components/Header";
-import CardPedidoAction from "@/components/CardPedidoAction";
+import CardPedidoCozinha from "@/components/CardPedidoCozinha";
 
 export default function Cozinha() {
   return (
@@ -9,8 +9,8 @@ export default function Cozinha() {
      <Header/>
     <h2 className="text-3xl m-8">Pedidos Em Andamento</h2>
     <div className="flex flex-row gap-10 flex-wrap justify-center items-center">
-      {/* TODO: pegar os pedidos em andamento e colocar em um map com CardPedidoAction */}
+      {/* TODO: pegar os pedidos em andamento e colocar em um map com CardPedidoCozinha */}
     </div>
     </>
-  )
+  );
 }
