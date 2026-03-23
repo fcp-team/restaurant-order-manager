@@ -14,7 +14,7 @@ export type NovoPedidoItemPayload = {
 }
 
 export type NovoPedidoPayload = {
-  numeroMesa: number
+  numeroMesa: string
   itens: NovoPedidoItemPayload[]
 }
 
@@ -27,7 +27,7 @@ export default class ServicoPedido {
   async criarPedido(payload: NovoPedidoPayload): Promise<Pedido> {
     const { numeroMesa, itens } = payload
 
-    if (!numeroMesa || numeroMesa <= 0) {
+    if (!numeroMesa) {
       throw new Error("Número de mesa inválido")
     }
 
@@ -95,7 +95,7 @@ export default class ServicoPedido {
   async fecharPedido(id: string) {
     // if (!this.autorizacao.autorizar()) throw new Error("Não autorizado")
     const pedido = await this.buscarPedido(id)
-    pedido.fechar("0")
+    pedido.fechar()
 
     await this.repositorio.atualizarStatusPedido(id, StatusPedido.FECHADO)
   }

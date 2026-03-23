@@ -6,13 +6,13 @@ export enum StatusItemPedido {
 
 export class ItemPedido {
   private id: string | null = null
-  private nome!: string
-  private precoUnitario!: number
   private status: StatusItemPedido = StatusItemPedido.PENDENTE
-
+  
   constructor(
     private readonly idItemMenu: string,
+    private nome: string,
     private quantidade: number,
+    private precoUnitario: number,
     public observacao?: string,
   ) { }
 
@@ -24,11 +24,7 @@ export class ItemPedido {
   }
 
   get Nome() {return this.nome}
-
-  set Nome(valor: string) {
-    this.nome = valor
-  }
-
+  
   get IdItemMenu() { return this.idItemMenu }
 
   get Status() { return this.status }

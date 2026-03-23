@@ -13,7 +13,7 @@ export class Pedido {
   private fechadoEm?: Date
 
   constructor(
-    private numeroMesa: string,
+    public numeroMesa: string,
     private itens: ItemPedido[],
   ) { }
 
