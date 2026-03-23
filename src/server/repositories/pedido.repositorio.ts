@@ -3,10 +3,8 @@ import { ResultSetHeader, RowDataPacket } from "mysql2"
 import { Pedido, StatusPedido } from "../classes/pedido"
 import { ItemPedido, StatusItemPedido } from "../classes/item-pedido"
 
-import type { NovoPedidoPayload } from "../services/pedido.servico"
-
 export interface IRepositorioPedido {
-  criarPedido(pedidoPayload: NovoPedidoPayload): Promise<Pedido>
+  criarPedido(pedido: Pedido): Promise<void>
   buscarPedido(id: string): Promise<Pedido | null>
   adicionarItem(idPedido: string, idItemMenu: string, quantidade: number): Promise<ItemPedido>
   acrescentarItem(idPedido: string, idItem: string, quantidade: number): Promise<ItemPedido>
@@ -69,45 +67,35 @@ export class RepositorioPedido implements IRepositorioPedido {
     }
   }
 
-  async criarPedido(pedidoPayload: NovoPedidoPayload): Promise<Pedido> {
+  async criarPedido(pedido: Pedido): Promise<void> {
     const conn = await pool.getConnection()
     try {
       await conn.beginTransaction()
 
-      const abertura = new Date()
-      // total inicial será calculado após inserir itens
       const [res] = await conn.execute<ResultSetHeader>(
         `INSERT INTO Pedidos (id_usuario, id_restaurante, mesa, abertura, total, status) VALUES (?, ?, ?, ?, ?, ?)`,
-        [null, null, String(pedidoPayload.numeroMesa), abertura, 0, "aberto"]
+        [1, 1, pedido.numeroMesa, pedido.CriadoEm, pedido.calcularTotal(), "aberto"]
       )
 
-      const insertId = res.insertId
+      const idPedido = res.insertId
+      pedido.Id = String(idPedido)
 
-      const itensCriados: ItemPedido[] = []
-
-      for (const item of pedidoPayload.itens) {
+      for (const item of pedido.Itens) {
         // buscar dados do item no menu (nome, valor)
-        const [rows] = await conn.execute<RowDataPacket[]>(`SELECT nome, valor FROM Itens WHERE id_item = ? AND excluido = 0`, [item.idItemMenu])
-        const menu = rows[0]
-        if (!menu) throw new Error("Item de menu não encontrado")
+        // const [rows] = await conn.execute<RowDataPacket[]>(`SELECT nome, valor FROM Itens WHERE id_item = ? AND excluido = 0`, [item.idItemMenu])
+        // const menu = rows[0]
+        // if (!menu) throw new Error("Item de menu não encontrado")
 
         const [r] = await conn.execute<ResultSetHeader>(
           `INSERT INTO ItensPedidos (id_pedido, id_item, quantidade, nota, status) VALUES (?, ?, ?, ?, ?)`,
-          [insertId, item.idItemMenu, item.quantidade, item.observacao ?? null, "preparando"]
+          [idPedido, item.IdItemMenu, item.Quantidade, item.observacao ?? null, "preparando"]
         )
 
         const idItemPedido = r.insertId
-
-        const itemPedido = new ItemPedido(String(idItemPedido), String(item.idItemMenu), menu.nome, item.quantidade, Number(menu.valor), item.observacao)
-        itensCriados.push(itemPedido)
+        item.Id = String(idItemPedido)
       }
 
-      const total = itensCriados.reduce((ac, it) => ac + it.calcularSubtotal(), 0)
-      await conn.execute(`UPDATE Pedidos SET total = ? WHERE id_pedido = ?`, [total, insertId])
-
       await conn.commit()
-
-      return new Pedido(String(insertId), Number(pedidoPayload.numeroMesa), itensCriados)
     } catch (err) {
       await conn.rollback()
       throw err
@@ -117,8 +105,11 @@ export class RepositorioPedido implements IRepositorioPedido {
   }
 
   async buscarPedido(id: string): Promise<Pedido | null> {
-    const [rowsP] = await pool.execute<RowDataPacket[]>(`SELECT * FROM Pedidos WHERE id_pedido = ? AND excluido = 0`, [Number(id)])
-    const pedidoRow = rowsP[0]
+    const [rowsPedidos] = await pool.execute<RowDataPacket[]>(
+      `SELECT * FROM Pedidos WHERE id_pedido = ? AND excluido = 0`,
+      [Number(id)]
+    )
+    const pedidoRow = rowsPedidos[0]
     if (!pedidoRow) return null
 
     const [rowsItens] = await pool.execute<RowDataPacket[]>(
@@ -130,14 +121,24 @@ export class RepositorioPedido implements IRepositorioPedido {
     )
 
     const itens: ItemPedido[] = rowsItens.map(r => {
-      const itemStatus = this.mapItemStatusDbToEnum(r.status)
-      return new ItemPedido(String(r.id_itempedido), String(r.id_item), r.nome, Number(r.quantidade), Number(r.valor), r.nota, itemStatus)
+      const item = new ItemPedido(
+        String(r.id_item),
+        r.nome,
+        Number(r.quantidade),
+        Number(r.valor),
+        r.nota ?? undefined
+      )
+      item.Id = String(r.id_itempedido)
+      item.Status = this.mapItemStatusDbToEnum(r.status)
+      return item
     })
 
-    const pedidoStatus = this.mapPedidoStatusDbToEnum(pedidoRow.status)
-    const dataFechamento: Date | undefined = new Date(pedidoRow.fechamento) ?? undefined
-
-    const pedido = new Pedido(String(pedidoRow.id_pedido), Number(pedidoRow.mesa), itens, pedidoStatus, dataFechamento)
+    const pedido = new Pedido(String(pedidoRow.mesa), itens)
+    pedido.Id = id
+    pedido.Status = this.mapPedidoStatusDbToEnum(pedidoRow.status)
+    if (pedidoRow.fechamento) {
+      pedido.FechadoEm = new Date(pedidoRow.fechamento)
+    }
 
     return pedido
   }

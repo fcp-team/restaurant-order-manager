@@ -27,7 +27,6 @@ export class Pedido {
   get CriadoEm() { return this.criadoEm }
 
   get Itens() { return [...this.itens] }
-
   get Status() { return this.status }
 
   set Status(valor: StatusPedido) {

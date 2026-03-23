@@ -35,10 +35,28 @@ export default class ServicoPedido {
       throw new Error("O pedido deve conter itens válidos")
     }
 
-    const result = await this.repositorio.criarPedido(payload)
-    if (!result) throw new Error("Falha ao criar pedido no repositório")
+    // TODO: substituir o mock pela busca de dados dos itens do cardápio
 
-    return result
+    // MOCK
+    const itensMenu = itens.map((i, index) => ({
+      ...i,
+      nome: `Item ${index}`,
+      preco: 10
+    }))
+
+    const pedidoItens = itensMenu.map(i => new ItemPedido(
+      i.idItemMenu,
+      i.nome,
+      i.quantidade,
+      i.preco,
+      i.observacao
+    ))
+    const pedido = new Pedido(numeroMesa, pedidoItens)
+
+    await this.repositorio.criarPedido(pedido)
+
+    console.log("ServicoPedido =>", pedido)
+    return pedido
   }
 
   async buscarPedido(id: string): Promise<Pedido> {
