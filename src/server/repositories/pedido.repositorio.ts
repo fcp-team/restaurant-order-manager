@@ -17,56 +17,6 @@ export interface IRepositorioPedido {
 }
 
 export class RepositorioPedido implements IRepositorioPedido {
-  private mapPedidoStatusDbToEnum(dbStatus: string): StatusPedido {
-    switch (dbStatus) {
-      case "aberto":
-        return StatusPedido.ABERTO
-      case "fechado":
-        return StatusPedido.FECHADO
-      case "cancelado":
-        return StatusPedido.CANCELADO
-      default:
-        return StatusPedido.ABERTO
-    }
-  }
-
-  private mapPedidoStatusEnumToDb(status: StatusPedido): string {
-    switch (status) {
-      case StatusPedido.ABERTO:
-        return "aberto"
-      case StatusPedido.FECHADO:
-        return "fechado"
-      case StatusPedido.CANCELADO:
-        return "cancelado"
-      default:
-        return "aberto"
-    }
-  }
-
-  private mapItemStatusDbToEnum(dbStatus: string): StatusItemPedido {
-    switch (dbStatus) {
-      case "preparando":
-        return StatusItemPedido.PREPARANDO
-      case "pronto":
-      case "entregue":
-        return StatusItemPedido.PRONTO
-      default:
-        return StatusItemPedido.PENDENTE
-    }
-  }
-
-  private mapItemStatusEnumToDb(status: StatusItemPedido): string {
-    switch (status) {
-      case StatusItemPedido.PREPARANDO:
-        return "preparando"
-      case StatusItemPedido.PRONTO:
-        return "pronto"
-      case StatusItemPedido.PENDENTE:
-      default:
-        return "preparando"
-    }
-  }
-
   async criarPedido(pedido: Pedido): Promise<void> {
     const conn = await pool.getConnection()
     try {
@@ -259,7 +209,10 @@ export class RepositorioPedido implements IRepositorioPedido {
 
   async listarPorStatus(status: StatusPedido): Promise<Pedido[]> {
     const dbStatus = this.mapPedidoStatusEnumToDb(status)
-    const [rows] = await pool.execute<RowDataPacket[]>(`SELECT * FROM Pedidos WHERE status = ? AND excluido = 0`, [dbStatus])
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      `SELECT * FROM Pedidos WHERE status = ? AND excluido = 0`,
+      [dbStatus]
+    )
 
     const pedidos: Pedido[] = []
     for (const r of rows) {
@@ -271,12 +224,25 @@ export class RepositorioPedido implements IRepositorioPedido {
         [r.id_pedido]
       )
       const itens = rowsItens.map(i => {
-        const itemStatus = this.mapItemStatusDbToEnum(i.status)
-        return new ItemPedido(String(i.id_itempedido), String(i.id_item), i.nome, Number(i.quantidade), Number(i.valor), i.nota, itemStatus)
+        const item = new ItemPedido(
+          String(i.id_item),
+          i.nome,
+          Number(i.quantidade),
+          Number(i.valor),
+          i.nota ?? undefined
+        )
+        item.Id = String(i.id_itempedido)
+        item.Status = this.mapItemStatusDbToEnum(i.status)
+        return item
       })
 
-      const pedidoStatus = this.mapPedidoStatusDbToEnum(r.status)
-      const pedido = new Pedido(String(r.id_pedido), Number(r.mesa), itens, pedidoStatus)
+      
+      const pedido = new Pedido(String(r.mesa), itens)
+      pedido.Id = String(r.id_pedido)
+      pedido.Status = this.mapPedidoStatusDbToEnum(r.status)
+      if (r.fechamento) {
+        pedido.FechadoEm = new Date(r.fechamento)
+      }
       pedidos.push(pedido)
     }
 
@@ -284,7 +250,11 @@ export class RepositorioPedido implements IRepositorioPedido {
   }
 
   async listarPorPeriodo(inicio: Date, fim: Date): Promise<Pedido[]> {
-    const [rows] = await pool.execute<RowDataPacket[]>(`SELECT * FROM Pedidos WHERE abertura BETWEEN ? AND ? AND excluido = 0`, [inicio, fim])
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      `SELECT * FROM Pedidos WHERE abertura BETWEEN ? AND ? AND excluido = 0`,
+      [inicio, fim]
+    )
+
     const pedidos: Pedido[] = []
     for (const r of rows) {
       const [rowsItens] = await pool.execute<RowDataPacket[]>(
@@ -296,12 +266,24 @@ export class RepositorioPedido implements IRepositorioPedido {
       )
 
       const itens = (rowsItens).map(i => {
-        const itemStatus = this.mapItemStatusDbToEnum(i.status)
-        return new ItemPedido(String(i.id_itempedido), String(i.id_item), i.nome, Number(i.quantidade), Number(i.valor), i.nota, itemStatus)
+        const item = new ItemPedido(
+          String(i.id_item),
+          i.nome,
+          Number(i.quantidade),
+          Number(i.valor),
+          i.nota ?? undefined
+        )
+        item.Id = String(i.id_itempedido)
+        item.Status = this.mapItemStatusDbToEnum(i.status)
+        return item
       })
 
-      const pedidoStatus = this.mapPedidoStatusDbToEnum(r.status)
-      const pedido = new Pedido(String(r.id_pedido), Number(r.mesa), itens, pedidoStatus)
+      const pedido = new Pedido(String(r.mesa), itens)
+      pedido.Id = String(r.id_pedido)
+      pedido.Status = this.mapPedidoStatusDbToEnum(r.status)
+      if (r.fechamento) {
+        pedido.FechadoEm = new Date(r.fechamento)
+      }
       pedidos.push(pedido)
     }
 
@@ -329,5 +311,55 @@ export class RepositorioPedido implements IRepositorioPedido {
       `UPDATE ItensPedidos SET status = ? WHERE id_itempedido = ? AND id_pedido = ?`,
       [dbStatus, Number(idItem), Number(idPedido)]
     )
+  }
+
+  private mapPedidoStatusDbToEnum(dbStatus: string): StatusPedido {
+    switch (dbStatus) {
+      case "aberto":
+        return StatusPedido.ABERTO
+      case "fechado":
+        return StatusPedido.FECHADO
+      case "cancelado":
+        return StatusPedido.CANCELADO
+      default:
+        return StatusPedido.ABERTO
+    }
+  }
+
+  private mapPedidoStatusEnumToDb(status: StatusPedido): string {
+    switch (status) {
+      case StatusPedido.ABERTO:
+        return "aberto"
+      case StatusPedido.FECHADO:
+        return "fechado"
+      case StatusPedido.CANCELADO:
+        return "cancelado"
+      default:
+        return "aberto"
+    }
+  }
+
+  private mapItemStatusDbToEnum(dbStatus: string): StatusItemPedido {
+    switch (dbStatus) {
+      case "preparando":
+        return StatusItemPedido.PREPARANDO
+      case "pronto":
+      case "entregue":
+        return StatusItemPedido.PRONTO
+      default:
+        return StatusItemPedido.PENDENTE
+    }
+  }
+
+  private mapItemStatusEnumToDb(status: StatusItemPedido): string {
+    switch (status) {
+      case StatusItemPedido.PREPARANDO:
+        return "preparando"
+      case StatusItemPedido.PRONTO:
+        return "pronto"
+      case StatusItemPedido.PENDENTE:
+      default:
+        return "preparando"
+    }
   }
 }

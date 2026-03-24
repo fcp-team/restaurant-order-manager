@@ -102,6 +102,11 @@ export default class ServicoPedido {
     return pedidos
   }
 
+  async listarPorPeriodo(inicio: Date, fim: Date): Promise<Pedido[]> {
+    const pedidos = await this.repositorio.listarPorPeriodo(inicio, fim)
+    return pedidos
+  }
+
   async mudarStatus(id: string, status: StatusPedido) {
     await this.repositorio.atualizarStatusPedido(id, status)
   }
