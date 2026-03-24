@@ -2,6 +2,7 @@ import { IRepositorioPedido } from "../repositories/pedido.repositorio"
 
 import { Pedido, StatusPedido } from "../classes/pedido"
 import { ItemPedido, StatusItemPedido } from "../classes/item-pedido"
+import { promises } from "dns"
 
 interface ServicoAutorizacao {
   autorizar(): boolean
@@ -125,12 +126,12 @@ export default class ServicoPedido {
     return pedidos
   }
 
-  async mudarStatus(id: string, status: StatusPedido) {
-    await this.repositorio.atualizarStatusPedido(id, status)
+  async alterarStatusPedido(id: string, status: StatusPedido): Promise<Pedido> {
+    return await this.repositorio.atualizarStatusPedido(id, status)
   }
 
-  async mudarStatusItem(idPedido: string, idItem: string, status: StatusItemPedido) {
-    await this.repositorio.atualizarStatusItem(idPedido, idItem, status)
+  async alterarStatusItem(idPedido: string, idItem: string, status: StatusItemPedido): Promise<Pedido> {
+    return await this.repositorio.atualizarStatusItem(idPedido, idItem, status)
   }
 
   async fecharPedido(id: string) {
