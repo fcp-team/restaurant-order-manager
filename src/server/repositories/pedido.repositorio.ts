@@ -6,14 +6,14 @@ import { ItemPedido, StatusItemPedido } from "../classes/item-pedido"
 export interface IRepositorioPedido {
   criarPedido(pedido: Pedido): Promise<void>
   buscarPedido(id: string): Promise<Pedido | null>
-  adicionarItem(idPedido: string, idItemMenu: string, quantidade: number): Promise<ItemPedido>
-  acrescentarItem(idPedido: string, idItem: string, quantidade: number): Promise<ItemPedido>
-  removerItem(idPedido: string, idItemMenu: string, quantidade: number): Promise<ItemPedido>
-  reduzirItem(idPedido: string, idItem: string, quantidade: number): Promise<ItemPedido>
+  adicionarItem(idPedido: string, item: ItemPedido): Promise<Pedido>
+  acrescentarItem(idPedido: string, idItem: string, quantidade: number): Promise<Pedido>
+  removerItem(idPedido: string, idItem: string): Promise<Pedido>
+  reduzirItem(idPedido: string, idItem: string, quantidade: number): Promise<Pedido>
   listarPorStatus(status: StatusPedido): Promise<Pedido[]>
   listarPorPeriodo(inicio: Date, fim: Date): Promise<Pedido[]>
-  atualizarStatusPedido(id: string, status: StatusPedido): Promise<void>
-  atualizarStatusItem(idPedido: string, idItem: string, status: StatusItemPedido): Promise<void>
+  atualizarStatusPedido(id: string, status: StatusPedido): Promise<Pedido>
+  atualizarStatusItem(idPedido: string, idItem: string, status: StatusItemPedido): Promise<Pedido>
 }
 
 export class RepositorioPedido implements IRepositorioPedido {
@@ -93,41 +93,24 @@ export class RepositorioPedido implements IRepositorioPedido {
     return pedido
   }
 
-  async adicionarItem(idPedido: string, idItemMenu: string, quantidade: number): Promise<ItemPedido> {
+  async adicionarItem(idPedido: string, item: ItemPedido): Promise<Pedido> {
     const conn = await pool.getConnection()
     try {
       await conn.beginTransaction()
 
-      const [existing] = await conn.execute<RowDataPacket[]>(
-        `SELECT * FROM ItensPedidos WHERE id_pedido = ? AND id_item = ? AND excluido = 0`,
-        [Number(idPedido), Number(idItemMenu)]
-      )
+      // const [menuRows] = await conn.execute<RowDataPacket[]>(`SELECT nome, valor FROM Itens WHERE id_item = ? AND excluido = 0`, [Number(idItemMenu)])
+      // const menu = menuRows[0]
+      // if (!menu) throw new Error("Item de menu não encontrado")
 
-      if (existing.length > 0) {
-        const row = existing[0]
-        const novaQuantidade = Number(row.quantidade) + quantidade
-        await conn.execute(`UPDATE ItensPedidos SET quantidade = ? WHERE id_itempedido = ?`, [novaQuantidade, row.id_itempedido])
-
-        const [menuRows] = await conn.execute<RowDataPacket[]>(`SELECT nome, valor FROM Itens WHERE id_item = ?`, [Number(idItemMenu)])
-        const menu = menuRows[0]
-
-        await conn.commit()
-        return new ItemPedido(String(row.id_itempedido), String(idItemMenu), menu.nome, novaQuantidade, Number(menu.valor), row.nota)
-      }
-
-      const [menuRows2] = await conn.execute<RowDataPacket[]>(`SELECT nome, valor FROM Itens WHERE id_item = ?`, [Number(idItemMenu)])
-      const menu2 = menuRows2[0]
-      if (!menu2) throw new Error("Item de menu não encontrado")
-
-      const [r] = await conn.execute<ResultSetHeader>(
+      await conn.execute<ResultSetHeader>(
         `INSERT INTO ItensPedidos (id_pedido, id_item, quantidade, nota, status) VALUES (?, ?, ?, ?, ?)`,
-        [Number(idPedido), Number(idItemMenu), quantidade, null, "preparando"]
+        [Number(idPedido), Number(item.IdItemMenu), item.Quantidade, item.observacao ?? null, "preparando"]
       )
-
-      const idItemPedido = r.insertId
       await conn.commit()
 
-      return new ItemPedido(String(idItemPedido), String(idItemMenu), menu2.nome, quantidade, Number(menu2.valor), undefined)
+      const pedido = await this.buscarPedido(idPedido)
+      if (!pedido) throw new Error("Pedido não encontrado após inserir item")
+      return pedido
     } catch (err) {
       await conn.rollback()
       throw err
@@ -136,69 +119,63 @@ export class RepositorioPedido implements IRepositorioPedido {
     }
   }
 
-  async acrescentarItem(idPedido: string, idItem: string, quantidade: number): Promise<ItemPedido> {
+  async acrescentarItem(idPedido: string, idItem: string, quantidade: number): Promise<Pedido> {
     const [rows] = await pool.execute<RowDataPacket[]>(
-      `SELECT ip.*, it.nome, it.valor
-       FROM ItensPedidos ip
-       JOIN Itens it ON ip.id_item = it.id_item
-       WHERE ip.id_itempedido = ? AND ip.id_pedido = ? AND ip.excluido = 0`,
+      `SELECT quantidade FROM ItensPedidos WHERE id_itempedido = ? AND id_pedido = ? AND excluido = 0`,
       [Number(idItem), Number(idPedido)]
     )
     const row = rows[0]
     if (!row) throw new Error("Item do pedido não encontrado")
 
-    const novaQuantidade = Number(row.quantidade) + quantidade
-    await pool.execute(`UPDATE ItensPedidos SET quantidade = ? WHERE id_itempedido = ?`, [novaQuantidade, Number(idItem)])
+    await pool.execute(
+      `UPDATE ItensPedidos SET quantidade = quantidade + ? WHERE id_itempedido = ? AND id_pedido = ?`,
+      [quantidade, Number(idItem), Number(idPedido)]
+    )
 
-    return new ItemPedido(String(row.id_itempedido), String(row.id_item), row.nome, novaQuantidade, Number(row.valor), row.nota)
+    const pedido = await this.buscarPedido(idPedido)
+    if (!pedido) throw new Error("Pedido não encontrado após atualizar item")
+    return pedido
   }
 
-  async reduzirItem(idPedido: string, idItem: string, quantidade: number): Promise<ItemPedido> {
+  async reduzirItem(idPedido: string, idItem: string, quantidade: number): Promise<Pedido> {
     const [rows] = await pool.execute<RowDataPacket[]>(
-      `SELECT ip.*, it.nome, it.valor
-       FROM ItensPedidos ip
-       JOIN Itens it ON ip.id_item = it.id_item
-       WHERE ip.id_itempedido = ? AND ip.id_pedido = ? AND ip.excluido = 0`,
+      `SELECT quantidade FROM ItensPedidos WHERE id_itempedido = ? AND id_pedido = ? AND excluido = 0`,
       [Number(idItem), Number(idPedido)]
     )
     const row = rows[0]
     if (!row) throw new Error("Item do pedido não encontrado")
 
     const novaQuantidade = Number(row.quantidade) - quantidade
-    if (novaQuantidade < 1) {
-      throw new Error("Quantidade não pode ser menor que 1")
-    }
+    if (novaQuantidade < 1) throw new Error("Quantidade não pode ser menor que 1")
 
-    await pool.execute(`UPDATE ItensPedidos SET quantidade = ? WHERE id_itempedido = ?`, [novaQuantidade, Number(idItem)])
+    await pool.execute(
+      `UPDATE ItensPedidos SET quantidade = ? WHERE id_itempedido = ? AND id_pedido = ?`,
+      [novaQuantidade, Number(idItem), Number(idPedido)]
+    )
 
-    return new ItemPedido(String(row.id_itempedido), String(row.id_item), row.nome, novaQuantidade, Number(row.valor), row.nota)
+    const pedido = await this.buscarPedido(idPedido)
+    if (!pedido) throw new Error("Pedido não encontrado após atualizar item")
+    return pedido
   }
 
-  async removerItem(idPedido: string, idItemMenu: string, quantidade: number): Promise<ItemPedido> {
+  async removerItem(idPedido: string, idItem: string): Promise<Pedido> {
     const conn = await pool.getConnection()
     try {
       await conn.beginTransaction()
 
-      const [rows] = await conn.execute<RowDataPacket[]>(`SELECT * FROM ItensPedidos WHERE id_pedido = ? AND id_item = ? AND excluido = 0`, [Number(idPedido), Number(idItemMenu)])
+      const [rows] = await conn.execute<RowDataPacket[]>(
+        `SELECT * FROM ItensPedidos WHERE id_pedido = ? AND id_item = ? AND excluido = 0`,
+        [Number(idPedido), Number(idItem)]
+      )
       const row = rows[0]
       if (!row) throw new Error("Item do pedido não encontrado")
-
-      const restante = Number(row.quantidade) - quantidade
-      if (restante > 0) {
-        await conn.execute(`UPDATE ItensPedidos SET quantidade = ? WHERE id_itempedido = ?`, [restante, row.id_itempedido])
-
-        const [menuRows] = await conn.execute<RowDataPacket[]>(`SELECT nome, valor FROM Itens WHERE id_item = ?`, [Number(idItemMenu)])
-        const menu = menuRows[0]
-        await conn.commit()
-        return new ItemPedido(String(row.id_itempedido), String(idItemMenu), menu.nome, restante, Number(menu.valor), row.nota)
-      }
 
       await conn.execute(`UPDATE ItensPedidos SET excluido = 1 WHERE id_itempedido = ?`, [row.id_itempedido])
       await conn.commit()
 
-      const [menuRows2] = await conn.execute<RowDataPacket[]>(`SELECT nome, valor FROM Itens WHERE id_item = ?`, [Number(idItemMenu)])
-      const menu2 = menuRows2[0]
-      return new ItemPedido(String(row.id_itempedido), String(idItemMenu), menu2.nome, 0, Number(menu2.valor), row.nota)
+      const pedido = await this.buscarPedido(idPedido)
+      if (!pedido) throw new Error("Pedido não encontrado após remover item")
+      return pedido
     } catch (err) {
       await conn.rollback()
       throw err
@@ -236,7 +213,7 @@ export class RepositorioPedido implements IRepositorioPedido {
         return item
       })
 
-      
+
       const pedido = new Pedido(String(r.mesa), itens)
       pedido.Id = String(r.id_pedido)
       pedido.Status = this.mapPedidoStatusDbToEnum(r.status)
@@ -290,7 +267,7 @@ export class RepositorioPedido implements IRepositorioPedido {
     return pedidos
   }
 
-  async atualizarStatusPedido(id: string, status: StatusPedido): Promise<void> {
+  async atualizarStatusPedido(id: string, status: StatusPedido): Promise<Pedido> {
     const dbStatus = this.mapPedidoStatusEnumToDb(status)
     if (status === StatusPedido.FECHADO || status === StatusPedido.CANCELADO) {
       await pool.execute(
@@ -303,14 +280,22 @@ export class RepositorioPedido implements IRepositorioPedido {
         [dbStatus, Number(id)]
       )
     }
+
+    const pedido = await this.buscarPedido(id)
+    if (!pedido) throw new Error("Pedido não encontrado após atualizar status")
+    return pedido
   }
 
-  async atualizarStatusItem(idPedido: string, idItem: string, status: StatusItemPedido): Promise<void> {
+  async atualizarStatusItem(idPedido: string, idItem: string, status: StatusItemPedido): Promise<Pedido> {
     const dbStatus = this.mapItemStatusEnumToDb(status)
     await pool.execute(
       `UPDATE ItensPedidos SET status = ? WHERE id_itempedido = ? AND id_pedido = ?`,
       [dbStatus, Number(idItem), Number(idPedido)]
     )
+
+    const pedido = await this.buscarPedido(idPedido)
+    if (!pedido) throw new Error("Pedido não encontrado após atualizar status do item")
+    return pedido
   }
 
   private mapPedidoStatusDbToEnum(dbStatus: string): StatusPedido {

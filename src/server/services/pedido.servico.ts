@@ -66,35 +66,53 @@ export default class ServicoPedido {
     return pedido
   }
 
-  async adicionarItem(idPedido: string, idItemMenu: string, quantidade: number): Promise<ItemPedido> {
-    if (quantidade <= 0) throw new Error("Quantidade inválida")
-    const item = await this.repositorio.adicionarItem(idPedido, idItemMenu, quantidade)
-    if (!item) throw new Error('Falha ao adicionar item')
+  async adicionarItem(idPedido: string, itemPayload: NovoPedidoItemPayload): Promise<Pedido> {
+    if (itemPayload.quantidade <= 0) throw new Error("Quantidade inválida")
 
-    return item
+    // TODO: substituir o mock pela busca de dados do item do cardápio
+
+    // MOCK
+    const itemMenu = {
+      ...itemPayload,
+      nome: `Item ${itemPayload.idItemMenu}`,
+      preco: 10
+    }
+
+    const novoItem = new ItemPedido(
+      itemMenu.idItemMenu,
+      itemMenu.nome,
+      itemMenu.quantidade,
+      itemMenu.preco,
+      itemMenu.observacao
+    )
+
+    const pedido = await this.repositorio.adicionarItem(idPedido, novoItem)
+    if (!pedido) throw new Error('Falha ao adicionar item')
+
+    return pedido
   }
 
-  async acrescentarItem(idPedido: string, idItem: string, quantidade: number): Promise<ItemPedido> {
+  async acrescentarItem(idPedido: string, idItem: string, quantidade: number): Promise<Pedido> {
     if (quantidade <= 0) throw new Error("Quantidade inválida")
-    const item = await this.repositorio.acrescentarItem(idPedido, idItem, quantidade)
-    if (!item) throw new Error('Falha ao adicionar item')
+    const pedido = await this.repositorio.acrescentarItem(idPedido, idItem, quantidade)
+    if (!pedido) throw new Error('Falha ao adicionar item')
 
-    return item
+    return pedido
   }
 
-  async removerItem(idPedido: string, idItemMenu: string, quantidade: number): Promise<ItemPedido> {
-    const item = await this.repositorio.removerItem(idPedido, idItemMenu, quantidade)
-    if (!item) throw new Error('Falha ao remover item')
+  async removerItem(idPedido: string, idItem: string): Promise<Pedido> {
+    const pedido = await this.repositorio.removerItem(idPedido, idItem)
+    if (!pedido) throw new Error('Falha ao remover item')
 
-    return item
+    return pedido
   }
 
-  async reduzirItem(idPedido: string, idItem: string, quantidade: number): Promise<ItemPedido> {
+  async reduzirItem(idPedido: string, idItem: string, quantidade: number): Promise<Pedido> {
     if (quantidade <= 0) throw new Error("Quantidade inválida")
-    const item = await this.repositorio.reduzirItem(idPedido, idItem, quantidade)
-    if (!item) throw new Error('Falha ao adicionar item')
+    const pedido = await this.repositorio.reduzirItem(idPedido, idItem, quantidade)
+    if (!pedido) throw new Error('Falha ao adicionar item')
 
-    return item
+    return pedido
   }
 
   async listarPorStatus(status: StatusPedido): Promise<Pedido[]> {
