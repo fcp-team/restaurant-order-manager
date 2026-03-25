@@ -55,8 +55,6 @@ export default class ServicoPedido {
     const pedido = new Pedido(numeroMesa, pedidoItens)
 
     await this.repositorio.criarPedido(pedido)
-
-    console.log("ServicoPedido =>", pedido)
     return pedido
   }
 

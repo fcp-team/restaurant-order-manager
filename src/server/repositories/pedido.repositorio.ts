@@ -164,7 +164,7 @@ export class RepositorioPedido implements IRepositorioPedido {
       await conn.beginTransaction()
 
       const [rows] = await conn.execute<RowDataPacket[]>(
-        `SELECT * FROM ItensPedidos WHERE id_pedido = ? AND id_item = ? AND excluido = 0`,
+        `SELECT * FROM ItensPedidos WHERE id_pedido = ? AND id_itempedido = ? AND excluido = 0`,
         [Number(idPedido), Number(idItem)]
       )
       const row = rows[0]

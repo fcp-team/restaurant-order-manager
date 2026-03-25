@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server"
-import OrderService from "@/server/services/order.service"
+import { RepositorioPedido } from "@/server/repositories/pedido.repositorio"
+import ServicoPedido from "@/server/services/pedido.servico"
 
-const orderService = new OrderService()
+const servicoPedido = new ServicoPedido(new RepositorioPedido())
+
+const dataFim = new Date()
+const dataInicio = new Date(dataFim.getTime() - 24 * 3600000)
 
 export async function GET() {
   try {
-    const pedidos = {}
+    const pedidos = await servicoPedido.listarPorPeriodo(dataInicio, dataFim)
     return NextResponse.json(pedidos)
 
   } catch (reason) {

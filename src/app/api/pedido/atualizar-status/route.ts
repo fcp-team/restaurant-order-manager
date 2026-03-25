@@ -10,7 +10,7 @@ export async function PATCH(request: Request) {
     console.log(payload)
 
     // TODO: atualizar itens do pedido no banco de dados
-    const pedido = await servicoPedido.alterarStatusItem(payload.idPedido, payload.idItem, payload.status)
+    const pedido = await servicoPedido.alterarStatusPedido(payload.idPedido, payload.status)
 
     await fetch("http://localhost:8080/broadcast", {
       method: "POST",
@@ -28,7 +28,7 @@ export async function PATCH(request: Request) {
   } catch (reason) {
     console.log(reason)
     return NextResponse.json(
-      { error: "Erro ao atualizar status do item" },
+      { error: "Erro ao atualizar status do pedido" },
       { status: 500 }
     )
   }

@@ -2,16 +2,16 @@ import { NextResponse } from "next/server"
 import { RepositorioPedido } from "@/server/repositories/pedido.repositorio"
 import ServicoPedido from "@/server/services/pedido.servico"
 
-import type { NovoPedidoPayload } from "@/server/services/pedido.servico"
-
 const servicoPedido = new ServicoPedido(new RepositorioPedido())
 
-export async function POST(request: Request) {
+export async function DELETE(request: Request) {
   try {
-    const novoPedido: NovoPedidoPayload = await request.json()
-    console.log(novoPedido)
+    const params = new URL(request.url).searchParams
+    console.log(params)
 
-    const pedido = await servicoPedido.criarPedido(novoPedido)
+    const idPedido = params.get("id-pedido") ?? ""
+    const idItem = params.get("id-item") ?? ""
+    const pedido = await servicoPedido.removerItem(idPedido, idItem)
 
     await fetch("http://localhost:8080/broadcast", {
       method: "POST",
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   } catch (reason) {
     console.error(reason)
     return NextResponse.json(
-      { error: "Erro ao criar pedido" },
+      { error: "Erro ao remover item do pedido" },
       { status: 500 }
     )
   }
