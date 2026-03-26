@@ -1,15 +1,27 @@
 import { NextResponse } from "next/server"
 import { RepositorioPedido } from "@/server/repositories/pedido.repositorio"
 import ServicoPedido from "@/server/services/pedido.servico"
+import { StatusPedido } from "@/server/classes/pedido"
 
 const servicoPedido = new ServicoPedido(new RepositorioPedido())
 
-const dataFim = new Date()
-const dataInicio = new Date(dataFim.getTime() - 24 * 3600000)
-
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const pedidos = await servicoPedido.listarPorPeriodo(dataInicio, dataFim)
+    const { searchParams } = new URL(request.url)
+    console.log(searchParams)
+
+    let pedidos = {}
+
+    const status = searchParams.get("status")
+    if (status) {
+      pedidos = await servicoPedido.listarPorStatus(status as StatusPedido)
+      return NextResponse.json(pedidos)
+    }
+
+    const dataFim = new Date(searchParams.get("data-fim") ?? new Date())
+    const dataInicio = new Date(searchParams.get("data-inicio") ?? new Date(dataFim.getTime() - 24 * 3600000))
+  
+    pedidos = await servicoPedido.listarPorPeriodo(dataInicio, dataFim)
     return NextResponse.json(pedidos)
 
   } catch (reason) {
