@@ -2,22 +2,22 @@ import { NextResponse } from "next/server"
 import { RepositorioPedido } from "@/server/repositories/pedido.repositorio"
 import ServicoPedido from "@/server/services/pedido.servico"
 
-import type { NovoPedidoItemPayload } from "@/server/services/pedido.servico"
-
-type NovoItemPayload = {
-  idPedido: string,
-  item: NovoPedidoItemPayload
-}
-
 const servicoPedido = new ServicoPedido(new RepositorioPedido())
 
 export async function POST(request: Request) {
   try {
-    const novoItem: NovoItemPayload = await request.json()
-    console.log(novoItem)
+    const { idPedido, novoItem } = await request.json()
+
+    if (!idPedido || !novoItem) {
+      return NextResponse.json(
+        { error: "Os campos 'idPedido' e 'novoItem' devem ser informados" },
+        { status: 400 }
+      )
+    }
 
     const pedido = await servicoPedido.adicionarItem(novoItem.idPedido, novoItem.item)
 
+    // TODO: ajustar mensagem de broadcast
     await fetch("http://localhost:8080/broadcast", {
       method: "POST",
       headers: {

@@ -8,7 +8,6 @@ const servicoPedido = new ServicoPedido(new RepositorioPedido())
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    console.log(searchParams)
 
     let pedidos = {}
 
@@ -18,8 +17,8 @@ export async function GET(request: Request) {
       return NextResponse.json(pedidos)
     }
 
-    const dataFim = new Date(searchParams.get("data-fim") ?? new Date())
-    const dataInicio = new Date(searchParams.get("data-inicio") ?? new Date(dataFim.getTime() - 24 * 3600000))
+    const dataInicio = new Date(searchParams.get("data-inicio") ?? new Date())
+    const dataFim = new Date(searchParams.get("data-fim") ?? dataInicio)
   
     pedidos = await servicoPedido.listarPorPeriodo(dataInicio, dataFim)
     return NextResponse.json(pedidos)

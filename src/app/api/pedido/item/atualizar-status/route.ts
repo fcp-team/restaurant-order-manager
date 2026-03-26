@@ -6,12 +6,18 @@ const servicoPedido = new ServicoPedido(new RepositorioPedido())
 
 export async function PATCH(request: Request) {
   try {
-    const payload = await request.json()
-    console.log(payload)
+    const { idPedido, idItem, status } = await request.json()
 
-    // TODO: atualizar itens do pedido no banco de dados
-    const pedido = await servicoPedido.alterarStatusItem(payload.idPedido, payload.idItem, payload.status)
+    if (!idPedido || !idItem || !status) {
+      return NextResponse.json(
+        { error: "Os campos 'idPedido', 'idItem' e 'status' devem ser informados" },
+        { status: 400 }
+      )
+    }
 
+    const pedido = await servicoPedido.alterarStatusItem(idPedido, idItem, status)
+
+    // TODO: ajustar mensagem de broadcast
     await fetch("http://localhost:8080/broadcast", {
       method: "POST",
       headers: {

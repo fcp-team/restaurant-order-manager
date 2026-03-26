@@ -9,10 +9,19 @@ export async function DELETE(request: Request) {
     const params = new URL(request.url).searchParams
     console.log(params)
 
-    const idPedido = params.get("id-pedido") ?? ""
-    const idItem = params.get("id-item") ?? ""
+    const idPedido = params.get("id-pedido")
+    const idItem = params.get("id-item")
+
+    if (!idPedido || !idItem) {
+      return NextResponse.json(
+        { error: "Os parâmetros 'id-pedido' e 'id-item' são obrigatórios" },
+        { status: 400 }
+      )
+    }
+
     const pedido = await servicoPedido.removerItem(idPedido, idItem)
 
+    // TODO: ajustar mensagem de broadcast
     await fetch("http://localhost:8080/broadcast", {
       method: "POST",
       headers: {
