@@ -1,4 +1,4 @@
-import { ItemPedido, StatusItemPedido } from "./item-pedido";
+import { ItemPedido, StatusItemPedido } from "./item-pedido"
 
 export enum StatusPedido {
   ABERTO = "ABERTO",
@@ -7,31 +7,40 @@ export enum StatusPedido {
 }
 
 export class Pedido {
+  private id: string | null = null
   private readonly criadoEm: Date = new Date()
   private status: StatusPedido = StatusPedido.ABERTO
   private fechadoEm?: Date
-  private idPagamento?: string
-  
+
   constructor(
-    private readonly id: string,
-    private numeroMesa: number,
-    private itens: ItemPedido[]
-  ) {}
+    public numeroMesa: string,
+    private itens: ItemPedido[],
+  ) { }
 
-  get Id() {
-    return this.id
+  get Id() { return String(this.id) }
+
+  set Id(valor: string) {
+    if (this.id) throw new Error("Não é possível atribuir um novo id ao pedido")
+    this.id = valor
   }
 
-  get Itens() {
-    return [...this.itens]
+  get CriadoEm() { return this.criadoEm }
+
+  get Itens() { return [...this.itens] }
+  
+  get Status() { return this.status }
+
+  set Status(valor: StatusPedido) {
+    this.status = valor
   }
 
-  get Status() {
-    return this.status
-  }
+  get FechadoEm() { return this.fechadoEm }
 
-  get CriadoEm() {
-    return this.criadoEm
+  set FechadoEm(data: Date) {
+    if (this.status === StatusPedido.ABERTO) {
+      throw new Error("Não é possível atribuir uma data de fechamento para um pedido que ainda está aberto")
+    }
+    this.fechadoEm = data
   }
 
   adicionarItem(item: ItemPedido) {
@@ -41,68 +50,67 @@ export class Pedido {
 
   removerItem(idItem: string) {
     this.assegurarPedidoAberto()
-    this.itens = this.itens.filter(i => i.Id !== idItem);
+    this.itens = this.itens.filter(i => i.Id !== idItem)
   }
 
   acrescentarItem(idItem: string) {
-    this.assegurarPedidoAberto();
+    this.assegurarPedidoAberto()
 
-    const item = this.pegarItem(idItem);
-    item.acrescentar();
+    const item = this.pegarItem(idItem)
+    item.acrescentar()
   }
 
   reduzirItem(itemId: string) {
-    this.assegurarPedidoAberto();
+    this.assegurarPedidoAberto()
 
-    const item = this.pegarItem(itemId);
-    item.reduzir();
+    const item = this.pegarItem(itemId)
+    item.reduzir()
   }
 
   alterarItemStatus(itemId: string, status: StatusItemPedido) {
-    const item = this.pegarItem(itemId);
-    item.alterarStatus(status);
+    const item = this.pegarItem(itemId)
+    item.alterarStatus(status)
   }
 
   listarItensPorStatus(status: StatusItemPedido) {
-    return this.itens.filter(i => i.Status === status);
+    return this.itens.filter(i => i.Status === status)
   }
 
   calcularTotal(): number {
     return this.itens
       .map(i => i.calcularSubtotal())
-      .reduce((ac, valor) => ac + valor, 0);
+      .reduce((ac, valor) => ac + valor, 0)
   }
 
-  fechar(idPagamento: string) {
-    this.assegurarPedidoAberto();
+  fechar() {
+    this.assegurarPedidoAberto()
 
-    this.idPagamento = idPagamento;
-    this.fechadoEm = new Date();
-    this.status = StatusPedido.FECHADO;
+    this.status = StatusPedido.FECHADO
+    this.fechadoEm = new Date()
   }
 
   cancelar() {
     if (this.status === StatusPedido.FECHADO) {
-      throw new Error("Pedidos fechados não podem ser cancelados");
+      throw new Error("Pedidos fechados não podem ser cancelados")
     }
 
-    this.status = StatusPedido.CANCELADO;
-    this.fechadoEm = new Date();
+    this.status = StatusPedido.CANCELADO
+    this.fechadoEm = new Date()
   }
 
   pegarItem(idItem: string): ItemPedido {
-    const item = this.itens.find(i => i.Id === idItem);
+    const item = this.itens.find(i => i.Id === idItem)
 
     if (!item) {
-      throw new Error("Item não encontrado");
+      throw new Error("Item não encontrado")
     }
 
-    return item;
+    return item
   }
 
   private assegurarPedidoAberto() {
     if (this.status !== StatusPedido.ABERTO) {
-      throw new Error("O pedido não está aberto");
+      throw new Error("O pedido não está aberto")
     }
   }
 }
