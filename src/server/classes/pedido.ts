@@ -34,7 +34,7 @@ export class Pedido {
     this.status = valor
   }
 
-  get FechadoEm() { return this.fechadoEm }
+  get FechadoEm() { return new Date(this.fechadoEm || "") }
 
   set FechadoEm(data: Date) {
     if (this.status === StatusPedido.ABERTO) {
