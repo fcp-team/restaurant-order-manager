@@ -1,4 +1,4 @@
-CREATE DATABASE gestao_restaurante;
+CREATE DATABASE IF NOT EXISTS gestao_restaurante;
 USE gestao_restaurante;
 
 -- =========================
