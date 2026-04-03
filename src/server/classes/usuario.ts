@@ -5,20 +5,17 @@ export enum Funcao {
 }
 
 export class Usuario {
-  private id: string | null = null
 
   constructor(
-    private nome: string,
-    private email: string,
-    private funcao: Funcao
+    public id_usuario: number,
+    public nome: string,
+    public email: string,
+    public senha: string,
+    public funcao: Funcao,
+    public excluido: boolean = false
   ) { }
 
-  get Id() { return String(this.id) }
-
-  set Id(valor: string) {
-    if (this.id) throw new Error("Não é possível atribuir um novo id ao usuário")
-    this.id = valor
-  }
+  get Id() { return this.id_usuario }
 
   get Nome() { return this.nome }
 

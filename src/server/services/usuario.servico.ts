@@ -7,21 +7,66 @@ export type UsuarioPayload = {
   senha: string
 }
 
-export default class ServicoPedido {
+export default class ServicoUsuario {
   constructor(
     private repositorio: IRepositorioUsuario,
-    // private autorizacao: ServicoAutorizacao
   ) { }
-  
-  async criarUsuario(usuario: UsuarioPayload): Promise<void> { }
 
-  async buscarUsuario(id: string): Promise<Usuario> { }
-  
-  async listarUsuarios(): Promise<Usuario[]> { }
+  async criarUsuario(usuario: UsuarioPayload): Promise<void> {
+    if (!usuario.nome || !usuario.email || !usuario.senha) {
+      throw new Error("Todos os campos são obrigatórios")
+    }
 
-  async listarPorFuncao(funcao: Funcao): Promise<Usuario[]> { }
+    const novoUsuario = new Usuario(
+      0,
+      usuario.nome,
+      usuario.email,
+      usuario.senha,
+      Funcao.GARCOM
+    )
 
-  async atualizarUsuario(id: string, payload: UsuarioPayload): Promise<Usuario> { }
+    await this.repositorio.criarUsuario(novoUsuario)
+  }
 
-  async removerUsuario(id: string): Promise<void> { }
+  async buscarUsuario(id: number): Promise<Usuario> {
+    const usuario = await this.repositorio.buscarUsuario(id)
+
+    if (!usuario) {
+      throw new Error("Usuário não encontrado")
+    }
+
+    return usuario
+  }
+
+  async listarUsuarios(): Promise<Usuario[]> {
+    return await this.repositorio.listarUsuarios()
+  }
+
+  async listarPorFuncao(funcao: Funcao): Promise<Usuario[]> {
+    return await this.repositorio.listarPorFuncao(funcao)
+  }
+
+  async atualizarUsuario(id: number, payload: UsuarioPayload): Promise<Usuario> {
+    const usuario = await this.repositorio.buscarUsuario(id)
+
+    if (!usuario) {
+      throw new Error("Usuário não encontrado")
+    }
+
+    usuario.nome = payload.nome ?? usuario.nome
+    usuario.email = payload.email ?? usuario.email
+    usuario.senha = payload.senha ?? usuario.senha
+
+    return await this.repositorio.atualizarUsuario(usuario)
+  }
+
+  async removerUsuario(id: number): Promise<void> {
+    const usuario = await this.repositorio.buscarUsuario(id)
+
+    if (!usuario) {
+      throw new Error("Usuário não encontrado")
+    }
+
+    await this.repositorio.removerUsuario(id)
+  }
 }
