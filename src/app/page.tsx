@@ -14,21 +14,41 @@ export default function Home() {
     socket.onopen = () => console.log("Conectado ao servidor")
 
     socket.onmessage = (event) => {
-      console.log("Mensagem do servidor:", event.data)
+      console.log(JSON.parse(event.data))
     }
 
     return () => socket.close()
   }, [])
 
   function handleClick() {
-    fetch("/api/pedidos?status=ABERTO")
+    fetch("/api/pedido/criar", {
+      method: "POST",
+      headers: { "Contetnt-Type": "application/json" },
+      body: JSON.stringify({
+        numeroMesa: "3",
+        itens: [
+          {
+            idItemMenu: "1",
+            quantidade: 2,
+          },
+          {
+            idItemMenu: "3",
+            quantidade: 1,
+          },
+        ]
+      })
+    })
       .then((res) => res.json())
       .then((res) => console.log(res))
 
-    const socket = socketRef.current
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ type: "message", payload: "Olá, servidor!" }))
-    }
+    // fetch("/api/pedidos?status=ABERTO")
+    //   .then((res) => res.json())
+    //   .then((res) => console.log(res))
+
+    // const socket = socketRef.current
+    // if (socket && socket.readyState === WebSocket.OPEN) {
+    //   socket.send(JSON.stringify({ type: "message", payload: "Olá, servidor!" }))
+    // }
   }
 
   return (

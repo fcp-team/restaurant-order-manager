@@ -13,10 +13,17 @@ const handle = app.getRequestHandler()
 // Cria o WebSocket server SEM acoplar diretamente ao HTTP
 const wss = new WebSocketServer({ noServer: true })
 
-// Tipagem opcional para mensagens
 type ClientMessage = {
-  type: 'data'
+  type: string
   payload: string
+}
+
+function broadcast(data: ClientMessage) {
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(data))
+    }
+  })
 }
 
 // Evento de conexão WebSocket
@@ -26,20 +33,8 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
   ws.on('message', (data) => {
     try {
       const message: ClientMessage = JSON.parse(data.toString())
-
       console.log('Mensagem recebida:', message)
 
-      // Broadcast para todos os clientes conectados
-      wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(
-            JSON.stringify({
-              type: 'message',
-              payload: `Echo: ${message.payload}`,
-            })
-          )
-        }
-      })
     } catch (err) {
       console.error('Erro ao processar mensagem:', err)
     }
@@ -56,7 +51,25 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
 app.prepare().then(() => {
   const server = createServer((req, res) => {
-    // Todas as requisições HTTP continuam sendo tratadas pelo Next
+    if (req.method !== "GET" && req.url === "/ws/broadcast") {
+      let body = ""
+
+      req.on("data", (chunk) => {
+        body += chunk
+      })
+
+      req.on("end", () => {
+        const data = JSON.parse(body)
+        broadcast(data)
+
+        res.writeHead(200)
+        res.end("ok")
+      })
+
+      return
+    }
+
+    // As demais requisições HTTP serão tratadas pelo Next
     handle(req, res)
   })
 
