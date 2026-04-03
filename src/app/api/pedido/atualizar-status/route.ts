@@ -18,14 +18,14 @@ export async function PATCH(request: Request) {
     const pedido = await servicoPedido.alterarStatusPedido(idPedido, status)
 
     // TODO: ajustar mensagem de broadcast
-    await fetch("http://localhost:8080/broadcast", {
+    await fetch("http://localhost:3000/ws/broadcast", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
         event: "itens-pedido:atualizar-status",
-        payload: JSON.stringify(pedido)
+        payload: JSON.stringify({ type: "pedido:atualizar-status", payload: pedido })
       })
     })
 

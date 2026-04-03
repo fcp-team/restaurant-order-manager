@@ -1,0 +1,32 @@
+services:
+  server:
+    build:
+      context: .
+    environment:
+      NODE_ENV: production
+    env_file:
+      - .env.production
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gestao_restaurante
+    ports:
+      - "3308:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./database/initial-schema.sql:/docker-entrypoint-initdb.d/initial-schema.sql
+    restart: always
+
+volumes:
+  db-data:
+    # secrets:
+    #   db-password:
+    #     file: db/password.txt
+
