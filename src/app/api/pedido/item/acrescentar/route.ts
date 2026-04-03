@@ -18,12 +18,12 @@ export async function PATCH(request: Request) {
     const pedido = await servicoPedido.acrescentarItem(idPedido, idItem, quantidade)
 
     // TODO: ajustar mensagem de broadcast
-    await fetch("http://localhost:8080/broadcast", {
+    await fetch("http://localhost:3000/ws/broadcast", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(pedido)
+      body: JSON.stringify({ type: "pedido:acrescentar-item", payload: pedido })
     })
 
     return NextResponse.json(pedido)
