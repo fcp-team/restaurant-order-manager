@@ -1,34 +1,33 @@
 {
-    "name": "restaurant-order-manager",
-    "version": "0.1.0",
-    "type": "module",
-    "private": true,
-    "scripts": {
-        "dev": "next dev",
-        "build": "next build",
-        "start": "next start",
-        "lint": "eslint",
-        "ws": "node src/server/ws-server.ts"
-    },
-    "dependencies": {
-        "@tailwindcss/postcss": "^4.2.1",
-        "@types/ws": "^8.18.1",
-        "autoprefixer": "^10.4.27",
-        "mysql2": "^3.18.1",
-        "next": "16.1.6",
-        "postcss": "^8.5.8",
-        "react": "19.2.3",
-        "react-dom": "19.2.3",
-        "recharts": "^3.8.0",
-        "tailwindcss": "^4.2.1",
-        "ws": "^8.19.0"
-    },
-    "devDependencies": {
-        "@types/node": "^20",
-        "@types/react": "^19",
-        "@types/react-dom": "^19",
-        "eslint": "^9",
-        "eslint-config-next": "16.1.6",
-        "typescript": "^5"
-    }
+  "name": "restaurant-order-manager",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch server.ts",
+    "build": "next build && tsc",
+    "start": "NODE_ENV=production node dist/server.js",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.2.1",
+    "@types/ws": "^8.18.1",
+    "autoprefixer": "^10.4.27",
+    "mysql2": "^3.18.1",
+    "next": "16.1.6",
+    "postcss": "^8.5.8",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "tailwindcss": "^4.2.1",
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  }
 }
