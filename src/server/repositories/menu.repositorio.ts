@@ -14,12 +14,25 @@ export interface IRepositorioMenu {
 }
 
 export class RepositorioMenu implements IRepositorioMenu {
-  async criarMenu(pedido: Menu): Promise<void> {
+
+  async criarMenu(menu: Menu): Promise<void> {
     const conn = await pool.getConnection()
     try {
       await conn.beginTransaction()
 
-      // const [res] = await conn.execute<ResultSetHeader>()
+      const [res] = await conn.execute<ResultSetHeader>(
+        `INSERT INTO Menus (nome) VALUES (?)`,
+        [menu.Nome]
+      )
+      menu.Id = String(res.insertId)
+
+      for (const item of menu.Itens) {
+        const [r] = await conn.execute<ResultSetHeader>(
+          `INSERT INTO Itens (id_menu, nome, descricao, valor) VALUES (?, ?, ?, ?)`,
+          [res.insertId, item.Nome, item.Descricao, item.Preco]
+        )
+        item.Id = String(r.insertId)
+      }
 
       await conn.commit()
     } catch (err) {
@@ -30,24 +43,74 @@ export class RepositorioMenu implements IRepositorioMenu {
     }
   }
 
-  async buscarMenu(id: string): Promise<Menu | null> { }
+  async buscarMenu(id: string): Promise<Menu | null> {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      `SELECT m.id_menu, m.nome,
+              i.id_item, i.nome AS item_nome, i.descricao AS item_descricao, i.valor
+       FROM Menus m
+       LEFT JOIN Itens i ON i.id_menu = m.id_menu AND i.excluido = 0
+       WHERE m.id_menu = ? AND m.excluido = 0`,
+      [Number(id)]
+    )
 
-  async atualizarMenu(menu: Menu): Promise<Menu> { }
+    if (rows.length === 0) return null
 
-  async buscarItem(idMenu: string, idItem: string): Promise<ItemMenu | null> { }
+    const primeira = rows[0]
 
-  async adicionarItem(idPedido: string, item: ItemMenu): Promise<Menu> {
+    const itens: ItemMenu[] = rows
+      .filter(r => r.id_item !== null)
+      .map(r => {
+        const item = new ItemMenu(r.item_nome, r.item_descricao ?? "", Number(r.valor))
+        item.Id = String(r.id_item)
+        return item
+      })
+
+    const menu = new Menu(primeira.nome, itens)
+    menu.Id = String(primeira.id_menu)
+    return menu
+  }
+
+  async atualizarMenu(menu: Menu): Promise<Menu> {
+    await pool.execute(
+      `UPDATE Menus SET nome = ? WHERE id_menu = ? AND excluido = 0`,
+      [menu.Nome, Number(menu.Id)]
+    )
+
+    const atualizado = await this.buscarMenu(menu.Id)
+    if (!atualizado) throw new Error("Menu não encontrado após atualizar")
+    return atualizado
+  }
+
+  async buscarItem(idMenu: string, idItem: string): Promise<ItemMenu | null> {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      `SELECT * FROM Itens WHERE id_item = ? AND id_menu = ? AND excluido = 0`,
+      [Number(idItem), Number(idMenu)]
+    )
+
+    const row = rows[0]
+    if (!row) return null
+
+    const item = new ItemMenu(row.nome, row.descricao ?? "", Number(row.valor))
+    item.Id = String(row.id_item)
+    return item
+  }
+
+  async adicionarItem(idMenu: string, item: ItemMenu): Promise<Menu> {
     const conn = await pool.getConnection()
     try {
       await conn.beginTransaction()
 
-      // await conn.execute<ResultSetHeader>()
+      const [res] = await conn.execute<ResultSetHeader>(
+        `INSERT INTO Itens (id_menu, nome, descricao, valor) VALUES (?, ?, ?, ?)`,
+        [Number(idMenu), item.Nome, item.Descricao, item.Preco]
+      )
+      item.Id = String(res.insertId)
 
       await conn.commit()
 
-      const pedido = await this.buscarMenu(idPedido)
-      if (!pedido) throw new Error("Pedido não encontrado após inserir item")
-      return pedido
+      const menu = await this.buscarMenu(idMenu)
+      if (!menu) throw new Error("Menu não encontrado após inserir item")
+      return menu
     } catch (err) {
       await conn.rollback()
       throw err
@@ -56,24 +119,27 @@ export class RepositorioMenu implements IRepositorioMenu {
     }
   }
 
-  async removerItem(idPedido: string, idItem: string): Promise<Menu> {
+  async removerItem(idMenu: string, idItem: string): Promise<Menu> {
     const conn = await pool.getConnection()
     try {
       await conn.beginTransaction()
 
       const [rows] = await conn.execute<RowDataPacket[]>(
-        `SELECT * FROM ItensPedidos WHERE id_pedido = ? AND id_itempedido = ? AND excluido = 0`,
-        [Number(idPedido), Number(idItem)]
+        `SELECT * FROM Itens WHERE id_item = ? AND id_menu = ? AND excluido = 0`,
+        [Number(idItem), Number(idMenu)]
       )
       const row = rows[0]
-      if (!row) throw new Error("Item do pedido não encontrado")
+      if (!row) throw new Error("Item não encontrado")
 
-      await conn.execute(`UPDATE ItensPedidos SET excluido = 1 WHERE id_itempedido = ?`, [row.id_itempedido])
+      await conn.execute(
+        `UPDATE Itens SET excluido = 1 WHERE id_item = ?`,
+        [Number(idItem)]
+      )
       await conn.commit()
 
-      const pedido = await this.buscarMenu(idPedido)
-      if (!pedido) throw new Error("Pedido não encontrado após remover item")
-      return pedido
+      const menu = await this.buscarMenu(idMenu)
+      if (!menu) throw new Error("Menu não encontrado após remover item")
+      return menu
     } catch (err) {
       await conn.rollback()
       throw err
@@ -82,5 +148,12 @@ export class RepositorioMenu implements IRepositorioMenu {
     }
   }
 
-  async atualizarItem(idMenu: string, item: ItemMenu): Promise<ItemMenu> { }
+  async atualizarItem(idMenu: string, item: ItemMenu): Promise<ItemMenu | null> {
+    await pool.execute(
+      `UPDATE Itens SET nome = ?, descricao = ?, valor = ? WHERE id_item = ? AND id_menu = ? AND excluido = 0`,
+      [item.Nome, item.Descricao, item.Preco, Number(item.Id), Number(idMenu)]
+    )
+
+    return await this.buscarItem(idMenu, item.Id)
+  }
 }
