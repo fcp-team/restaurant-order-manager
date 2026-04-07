@@ -4,8 +4,8 @@ import { Usuario, Funcao } from "../classes/usuario"
 
 export interface IRepositorioUsuario {
   criarUsuario(usuario: Usuario): Promise<void>
- buscarUsuario(id: number): Promise<Usuario | null>
-removerUsuario(id: number): Promise<void>
+  buscarUsuario(id: number): Promise<Usuario | null>
+  removerUsuario(id: number): Promise<void>
   listarUsuarios(): Promise<Usuario[]>
   listarPorFuncao(funcao: Funcao): Promise<Usuario[]>
   atualizarUsuario(usuario: Usuario): Promise<Usuario>
@@ -50,7 +50,7 @@ export class RepositorioUsuario implements IRepositorioUsuario {
       row.email,
       row.senha,
       row.funcao as Funcao,
-       Boolean(row.excluido)
+      Boolean(row.excluido)
     )
   }
 
@@ -65,7 +65,7 @@ export class RepositorioUsuario implements IRepositorioUsuario {
       row.email,
       row.senha,
       row.funcao as Funcao,
-       Boolean(row.excluido)
+      Boolean(row.excluido)
     ))
   }
 
@@ -82,7 +82,7 @@ export class RepositorioUsuario implements IRepositorioUsuario {
       row.email,
       row.senha,
       row.funcao as Funcao,
-       Boolean(row.excluido)
+      Boolean(row.excluido)
     ))
   }
 
