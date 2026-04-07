@@ -3,7 +3,7 @@
 import Header from "@/components/Header";
 import Link from "next/link";
 import CardPedidoView from "@/components/CardPedidoView";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Pedidos(){
 
@@ -11,6 +11,23 @@ export default function Pedidos(){
       const [numeroMesa, setNumeroMesa] = useState("");
       const [dataPedido, setDataPedido] = useState("");
       const [estado, setEstado] = useState("");
+
+      const [pedidos, setPedidos] = useState([]);
+
+         useEffect(() => {
+         fetch("/api/pedidos", {
+            method: "GET",
+            headers: {
+               "Content-Type": "application/json",
+            },
+         })
+            .then(res => res.json())
+            .then(data => {
+               console.log("Pedidos recebidos:", data);
+               setPedidos(data);
+            })
+            .catch(err => console.error(err));
+         }, []);
 
       const limparFiltros = () => {
          setNumeroPedido("");
