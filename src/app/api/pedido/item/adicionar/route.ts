@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server"
 import { RepositorioPedido } from "@/server/repositories/pedido.repositorio"
 import ServicoPedido from "@/server/services/pedido.servico"
+import { Funcao } from "@/server/classes/usuario"
+import { requireRole } from "@/server/lib/auth"
+import { cookies } from "next/headers"
 
 const servicoPedido = new ServicoPedido(new RepositorioPedido())
 
 export async function POST(request: Request) {
   try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get("auth_token")?.value || ""
+    requireRole(token, Funcao.GARCOM)
+
     const { idPedido, novoItem } = await request.json()
 
     if (!idPedido || !novoItem) {
@@ -17,7 +24,6 @@ export async function POST(request: Request) {
 
     const pedido = await servicoPedido.adicionarItem(novoItem.idPedido, novoItem.item)
 
-    // TODO: ajustar mensagem de broadcast
     await fetch("http://localhost:3000/ws/broadcast", {
       method: "POST",
       headers: {

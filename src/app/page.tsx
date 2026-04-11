@@ -21,40 +21,37 @@ export default function Home() {
   }, [])
 
   function handleClick() {
-    fetch("/api/pedido/criar", {
+    fetch("/api/auth/login", {
       method: "POST",
-      headers: { "Contetnt-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        numeroMesa: "3",
-        itens: [
-          {
-            idItemMenu: "1",
-            quantidade: 2,
-          },
-          {
-            idItemMenu: "3",
-            quantidade: 1,
-          },
-        ]
+        email: "garcon@gmail.com",
+        senha: "123",
       })
     })
       .then((res) => res.json())
       .then((res) => console.log(res))
+  }
 
-    // fetch("/api/pedidos?status=ABERTO")
-    //   .then((res) => res.json())
-    //   .then((res) => console.log(res))
-
-    // const socket = socketRef.current
-    // if (socket && socket.readyState === WebSocket.OPEN) {
-    //   socket.send(JSON.stringify({ type: "message", payload: "Olá, servidor!" }))
-    // }
+  function update() {
+    fetch("/api/pedido/item/atualizar-status", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        idPedido: "1",
+        idItem: "1",
+        status: "PRONTO"
+      })
+    })
+      .then((res) => res.json())
+      .then((res) => console.log(res))
   }
 
   return (
     <>
       <h1>WebSocket Test</h1>
       <button type="button" onClick={handleClick}>Fetch</button>
+      <button type="button" onClick={update}>Update</button>
     </>
   )
 }

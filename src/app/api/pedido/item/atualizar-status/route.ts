@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server"
 import { RepositorioPedido } from "@/server/repositories/pedido.repositorio"
 import ServicoPedido from "@/server/services/pedido.servico"
+import { requireRole } from "@/server/lib/auth"
+import { Funcao } from "@/server/classes/usuario"
+import { cookies } from "next/headers"
+
 
 const servicoPedido = new ServicoPedido(new RepositorioPedido())
 
 export async function PATCH(request: Request) {
   try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get("auth_token")?.value || ""
+    requireRole(token, Funcao.COZINHA)
+
     const { idPedido, idItem, status } = await request.json()
 
     if (!idPedido || !idItem || !status) {
@@ -17,7 +25,6 @@ export async function PATCH(request: Request) {
 
     const pedido = await servicoPedido.alterarStatusItem(idPedido, idItem, status)
 
-    // TODO: ajustar mensagem de broadcast
     await fetch("http://localhost:3000/ws/broadcast", {
       method: "POST",
       headers: {
