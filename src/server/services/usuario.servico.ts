@@ -5,6 +5,7 @@ export type UsuarioPayload = {
   nome: string
   email: string
   senha: string
+  funcao: Funcao
 }
 
 export default class ServicoUsuario {
@@ -12,8 +13,8 @@ export default class ServicoUsuario {
     private repositorio: IRepositorioUsuario,
   ) { }
   
-  async criarUsuario(usuario: UsuarioPayload): Promise<void> {
-    if (!usuario.nome || !usuario.email || !usuario.senha) {
+  async criarUsuario(usuario: UsuarioPayload): Promise<Usuario> {
+    if (!usuario.nome || !usuario.email || !usuario.senha || !usuario.funcao) {
       throw new Error("Todos os campos são obrigatórios")
     }
     
@@ -22,10 +23,11 @@ export default class ServicoUsuario {
       usuario.nome,
       usuario.email,
       usuario.senha,
-      Funcao.GARCOM
+      usuario.funcao
     )
     
     await this.repositorio.criarUsuario(novoUsuario)
+    return novoUsuario
   }
   
   async autenticarUsuario(email: string, senha: string): Promise<Usuario> {
