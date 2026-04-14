@@ -12,15 +12,6 @@ export class AuthError extends Error {
   }
 }
 
-export function requireAuth(request: Request): TokenPayload {
-  const token = autenticacaoServico.extrairToken(request)
-  if (!token) {
-    throw new AuthError("Token de autenticação não encontrado", 401)
-  }
-
-  return autenticacaoServico.verificarToken(token)
-}
-
 export function requireRole(token: string, funcao: Funcao): TokenPayload {
   const usuario = autenticacaoServico.verificarToken(token)
   const autorizado = autorizacaoServico.autorizar(usuario, funcao)

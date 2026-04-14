@@ -35,14 +35,4 @@ export class ServicoAutenticacao {
 
     return { id_usuario, email, funcao }
   }
-
-  extrairToken(request: Request): string | null {
-    const authorization = request.headers.get("Authorization")
-    if (!authorization) return null
-
-    const [scheme, token] = authorization.split(" ")
-    if (scheme !== "Bearer" || !token) return null
-
-    return token.trim()
-  }
 }

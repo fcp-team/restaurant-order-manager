@@ -3,16 +3,16 @@ import { RepositorioPedido } from "@/server/repositories/pedido.repositorio"
 import ServicoPedido from "@/server/services/pedido.servico"
 import { requireRole } from "@/server/lib/auth"
 import { Funcao } from "@/server/classes/usuario"
-import { cookies } from "next/headers"
 
 
 const servicoPedido = new ServicoPedido(new RepositorioPedido())
 
 export async function PATCH(request: Request) {
   try {
-    const cookieStore = await cookies()
-    const token = cookieStore.get("auth_token")?.value || ""
-    requireRole(token, Funcao.COZINHA)
+    requireRole(
+      request.headers.get("X-User-Token") || "",
+      Funcao.COZINHA
+    )
 
     const { idPedido, idItem, status } = await request.json()
 
