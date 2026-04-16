@@ -136,7 +136,6 @@ WHERE id_pedido = ? AND excluido = 0;
 SELECT * FROM Pedidos 
 WHERE status = 'aberto' AND excluido = 0;
 
-
 -- Cria novo pedido
 INSERT INTO Pedidos 
 (id_usuario, mesa, abertura, total, status)
