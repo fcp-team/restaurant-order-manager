@@ -44,9 +44,9 @@ VALUES
 -- =========================
 -- INSERT PEDIDOS
 -- =========================
-INSERT INTO Pedidos (id_usuario, id_restaurante, mesa, abertura, pagamento, total)
+INSERT INTO Pedidos (id_usuario, mesa, abertura, pagamento, total)
 VALUES
-(2,1,'01',NOW(),0.00,29.99);
+(2,'01',NOW(),0.00,29.99);
 
 -- =========================
 -- INSERT ITENS PEDIDOS

@@ -136,14 +136,11 @@ WHERE id_pedido = ? AND excluido = 0;
 SELECT * FROM Pedidos 
 WHERE status = 'aberto' AND excluido = 0;
 
--- Lista pedidos por restaurante
-SELECT * FROM Pedidos 
-WHERE id_restaurante = ? AND excluido = 0;
 
 -- Cria novo pedido
 INSERT INTO Pedidos 
-(id_usuario, id_restaurante, mesa, abertura, total, status)
-VALUES (?, ?, ?, NOW(), 0, 'aberto');
+(id_usuario, mesa, abertura, total, status)
+VALUES (?, ?, NOW(), 0, 'aberto');
 
 -- Atualiza status do pedido
 -- Lembrado que os Status de Pedidos são: 

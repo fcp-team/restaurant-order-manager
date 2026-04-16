@@ -89,7 +89,6 @@ CREATE TABLE Itens (
 CREATE TABLE Pedidos (
     id_pedido INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
-    id_restaurante INT NOT NULL,
     mesa VARCHAR(10) NOT NULL,
     abertura DATETIME NOT NULL,
     fechamento DATETIME,
@@ -102,12 +101,6 @@ CREATE TABLE Pedidos (
     CONSTRAINT fk_pedidos_usuario
         FOREIGN KEY (id_usuario)
         REFERENCES Usuarios(id_usuario)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_pedidos_restaurante
-        FOREIGN KEY (id_restaurante)
-        REFERENCES Restaurantes(id_restaurante)
         ON DELETE RESTRICT
         ON UPDATE CASCADE
 ) ENGINE=InnoDB;
