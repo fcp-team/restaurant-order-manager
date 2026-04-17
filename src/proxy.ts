@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { ServicoAutenticacao } from "./server/services/autenticacao.servico";
-
-const servicoAutenticacao = new ServicoAutenticacao()
+import { autorizar, verificarToken } from "./server/lib/auth";
 
 export async function proxy(request: NextRequest) {
   try {
     const cookieStore = await cookies()
     const token = cookieStore.get("auth_token")?.value || ""
 
-    servicoAutenticacao.verificarToken(token)
+    const usuario = verificarToken(token)
 
     const { pathname } = request.nextUrl
     
@@ -17,10 +15,15 @@ export async function proxy(request: NextRequest) {
       return NextResponse.next()
     }
 
-    const response = NextResponse.next()
-    response.headers.set("X-User-Token", token)
+    const autorizado = autorizar(usuario, pathname)
+    if (!autorizado) {
+      return NextResponse.json(
+        { error: "Acesso negado" },
+        { status: 403 }
+      )
+    }
 
-    return response
+    return NextResponse.next()
 
   } catch (reason) {
     console.log(reason)

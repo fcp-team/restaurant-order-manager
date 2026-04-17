@@ -1,19 +1,11 @@
 import { NextResponse } from "next/server"
 import { RepositorioPedido } from "@/server/repositories/pedido.repositorio"
 import ServicoPedido from "@/server/services/pedido.servico"
-import { requireRole } from "@/server/lib/auth"
-import { Funcao } from "@/server/classes/usuario"
-
 
 const servicoPedido = new ServicoPedido(new RepositorioPedido())
 
 export async function PATCH(request: Request) {
   try {
-    requireRole(
-      request.headers.get("X-User-Token") || "",
-      Funcao.COZINHA
-    )
-
     const { idPedido, idItem, status } = await request.json()
 
     if (!idPedido || !idItem || !status) {

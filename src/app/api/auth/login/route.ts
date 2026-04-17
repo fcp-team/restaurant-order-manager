@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server"
 import { RepositorioUsuario } from "@/server/repositories/usuario.repositorio"
 import ServicoUsuario from "@/server/services/usuario.servico"
-import { ServicoAutenticacao } from "@/server/services/autenticacao.servico"
+import { gerarToken } from "@/server/lib/auth"
 
 const servicoUsuario = new ServicoUsuario(new RepositorioUsuario())
-const servicoAutenticacao = new ServicoAutenticacao()
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +17,7 @@ export async function POST(request: Request) {
     }
 
     const usuario = await servicoUsuario.autenticarUsuario(email, senha)
-    const token = servicoAutenticacao.gerarToken(usuario)
+    const token = gerarToken(usuario)
 
     const response = NextResponse.json({ message: "Login realizado com sucesso!" })
 
