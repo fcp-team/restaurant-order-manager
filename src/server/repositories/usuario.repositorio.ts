@@ -1,11 +1,11 @@
 import pool from "@/lib/db"
-import { RowDataPacket } from "mysql2"
+import { ResultSetHeader, RowDataPacket } from "mysql2"
 import { Usuario, Funcao } from "../classes/usuario"
 
 export interface IRepositorioUsuario {
   criarUsuario(usuario: Usuario): Promise<void>
- buscarUsuario(id: number): Promise<Usuario | null>
-removerUsuario(id: number): Promise<void>
+  buscarUsuario(id: number): Promise<Usuario | null>
+  removerUsuario(id: number): Promise<void>
   listarUsuarios(): Promise<Usuario[]>
   listarPorFuncao(funcao: Funcao): Promise<Usuario[]>
   atualizarUsuario(usuario: Usuario): Promise<Usuario>
@@ -18,11 +18,13 @@ export class RepositorioUsuario implements IRepositorioUsuario {
     try {
       await conn.beginTransaction()
 
-      await conn.execute(
+      const result = await conn.execute<ResultSetHeader>(
         `INSERT INTO Usuarios (nome, email, senha, funcao)
          VALUES (?, ?, ?, ?)`,
         [usuario.nome, usuario.email, usuario.senha, usuario.funcao]
       )
+
+      usuario.id_usuario = String(result[0].insertId)
 
       await conn.commit()
     } catch (err) {
@@ -50,7 +52,7 @@ export class RepositorioUsuario implements IRepositorioUsuario {
       row.email,
       row.senha,
       row.funcao as Funcao,
-       Boolean(row.excluido)
+      Boolean(row.excluido)
     )
   }
 
@@ -65,7 +67,7 @@ export class RepositorioUsuario implements IRepositorioUsuario {
       row.email,
       row.senha,
       row.funcao as Funcao,
-       Boolean(row.excluido)
+      Boolean(row.excluido)
     ))
   }
 
@@ -82,7 +84,7 @@ export class RepositorioUsuario implements IRepositorioUsuario {
       row.email,
       row.senha,
       row.funcao as Funcao,
-       Boolean(row.excluido)
+      Boolean(row.excluido)
     ))
   }
 
