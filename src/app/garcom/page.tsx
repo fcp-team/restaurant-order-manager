@@ -21,19 +21,23 @@ export default function Garcom() {
   const [itensPedido, setItensPedido] = useState<string[]>([])
 
   useEffect(() => {
-    const ws = getSocket()
+  const ws = getSocket()
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      if (data.tipo === "pedido_pronto") {
-        setPedidosProntos((prev) => [...prev, data.pedido])
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data)
+    if (data.type === "pedido:atualizar-status-item") {
+      const pedido = data.payload
+      const todosProntos = pedido.itens?.every((item: any) => item.Status === "PRONTO")
+      if (todosProntos) {
+        setPedidosProntos((prev) => [...prev, pedido])
       }
     }
+  }
 
-    return () => {
-      ws.onmessage = null
-    }
-  }, [])
+  return () => {
+    ws.onmessage = null
+  }
+}, [])
 
   function adicionarPrato() {
     if (nomePrato.trim() === "") return
