@@ -17,7 +17,6 @@ export async function POST(request: Request) {
 
     const pedido = await servicoPedido.adicionarItem(novoItem.idPedido, novoItem.item)
 
-    // TODO: ajustar mensagem de broadcast
     await fetch("http://localhost:3000/ws/broadcast", {
       method: "POST",
       headers: {

@@ -17,7 +17,6 @@ export async function PATCH(request: Request) {
 
     const pedido = await servicoPedido.alterarStatusItem(idPedido, idItem, status)
 
-    // TODO: ajustar mensagem de broadcast
     await fetch("http://localhost:3000/ws/broadcast", {
       method: "POST",
       headers: {
