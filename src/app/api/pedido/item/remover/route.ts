@@ -21,7 +21,6 @@ export async function DELETE(request: Request) {
 
     const pedido = await servicoPedido.removerItem(idPedido, idItem)
 
-    // TODO: ajustar mensagem de broadcast
     await fetch("http://localhost:3000/ws/broadcast", {
       method: "POST",
       headers: {
