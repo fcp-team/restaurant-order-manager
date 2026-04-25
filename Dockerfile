@@ -13,8 +13,7 @@ ARG NODE_VERSION=22.19.0
 FROM node:${NODE_VERSION}-alpine as base
 
 # Set working directory for all build stages.
-WORKDIR /usr/src/app
-
+WORKDIR /app
 
 ################################################################################
 # Create a stage for installing production dependecies.
@@ -61,8 +60,8 @@ COPY package.json .
 
 # Copy the production dependencies from the deps stage and also
 # the built application from the build stage into the image.
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/. ./.
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=build /app/. ./.
 
 
 # Expose the port that the application listens on.

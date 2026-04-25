@@ -4,8 +4,13 @@ services:
       context: .
     environment:
       NODE_ENV: production
-    env_file:
-      - .env.production
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: secret
+      DB_NAME: gestao_restaurante
+      JWT_SECRET: 4bb7c591820bc6654219df61d4fe28adc2bc4457a5a757081af0829a5d9b5b887d96d16f39582b569878a8d0979caa1a942ce911260de0f8769a797fb458c0fb
+      JWT_EXPIRES_IN: 1h
     ports:
       - 3000:3000
     depends_on:
@@ -15,10 +20,10 @@ services:
   db:
     image: mysql:8
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: gestao_restaurante
     ports:
-      - "3308:3306"
+      - "3306"
     volumes:
       - db-data:/var/lib/mysql
       - ./database/initial-schema.sql:/docker-entrypoint-initdb.d/initial-schema.sql
@@ -26,7 +31,6 @@ services:
 
 volumes:
   db-data:
-    # secrets:
-    #   db-password:
-    #     file: db/password.txt
-
+# secrets:
+#   db-password:
+#     file: db/password.txt
