@@ -7,7 +7,7 @@ export enum Funcao {
 export class Usuario {
 
   constructor(
-    public id_usuario: number,
+    public id_usuario: string,
     public nome: string,
     public email: string,
     public senha: string,
