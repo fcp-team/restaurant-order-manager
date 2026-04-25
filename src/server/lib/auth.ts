@@ -1,4 +1,4 @@
-import jwt, { Secret } from "jsonwebtoken"
+import jwt, { Secret, SignOptions } from "jsonwebtoken"
 import { Funcao, Usuario } from "@/server/classes/usuario"
 
 const rotasPorFuncao: Record<Funcao, string[]> = {
@@ -37,8 +37,8 @@ export function autorizar(usuario: TokenPayload, pathname: string): boolean {
   return rotasPermitidas.some(rota => pathname.startsWith(rota))
 }
 
-const JWT_SECRET: Secret = process.env.JWT_SECRET ?? "dev-secret"
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? "7d"
+const JWT_SECRET: Secret = process.env.JWT_SECRET ?? "dev-secret" as Secret
+const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN ?? "7d") as SignOptions["expiresIn"]
 
 export function gerarToken(usuario: Usuario): string {
   const payload: TokenPayload = {
