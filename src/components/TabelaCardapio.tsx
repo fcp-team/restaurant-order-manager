@@ -1,14 +1,13 @@
  type TabelaCardapioProps = {
-    itemPedido: Record<string, any>
+    cardapio: Record<string, any>
 }
 
-export default function TabelaCardapio({itemPedido}: TabelaCardapioProps){
+export default function TabelaCardapio({cardapio}: TabelaCardapioProps){
     return (
-       <div className="p-4">
+       <div className="p-5">
             <div className="max-w-5xl mx-auto">
                 
-                <h2 className="text-2xl font-bold text-gray-800">Nome Cardápio</h2>
-                <p className="text-gray-500 mb-4">Cardápio com pratos do restaurante</p>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">{cardapio.nome}</h2>
 
                 <div className="overflow-x-auto rounded-lg shadow">
                 <table className="min-w-full bg-white">
@@ -22,17 +21,22 @@ export default function TabelaCardapio({itemPedido}: TabelaCardapioProps){
                     </thead>
 
                     <tbody className="divide-y">
-                    <tr className="hover:bg-gray-50 transition">
-                        <td className="px-4 py-3 font-medium text-gray-800">
-                        Virada Paulista
-                        </td>
-                        <td className="px-4 py-3 text-gray-600">
-                        tutu de feijão cremoso, bisteca suína, couve refogada, arroz branco
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-[var(--color-text-highlight)]">
-                        R$ 25,00
-                        </td>
-                    </tr>
+                        {cardapio.itens.map((item: any) => (
+                          <tr key={item.id} className="hover:bg-gray-50 transition">
+                            <td className="px-4 py-3 font-medium text-gray-800">
+                            {item.nome}
+                            </td>
+                            <td className="px-4 py-3 text-gray-600">
+                            {item.descricao}
+                            </td>
+                            <td className="px-4 py-3 font-semibold text-[var(--color-text-highlight)] whitespace-nowrap">
+                                {new Intl.NumberFormat('pt-BR', {
+                                  style: 'currency',
+                                  currency: 'BRL',
+                                }).format(item.preco)}
+                            </td>
+                         </tr>
+                        ))}
                     </tbody>
 
                 </table>

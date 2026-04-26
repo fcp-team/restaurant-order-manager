@@ -1,8 +1,28 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import Header from "@/components/Header";
+import TabelaCardapio from "@/components/TabelaCardapio";
 import Link from "next/link";
 
 export default function Menu(){
+
+   const [cardapios, setCardapios] = useState([]);
+
+   useEffect(() => {
+   fetch("/api/menus", {
+      method: "GET",
+      headers: {
+         "Content-Type": "application/json",
+      },
+   })
+      .then(res => res.json())
+      .then(data => {
+         console.log("Cardapios recebidos:", data);
+         setCardapios(data);
+      })
+      .catch(err => console.error(err));
+   }, []);
 
    return(   
       <>
@@ -18,7 +38,9 @@ export default function Menu(){
             <Link href="/admin/menu/cadastro-item" className="cursor-pointer bg-[var(--color-button-action)] transition duration-300 hover:bg-[var(--color-button-action-hover)] border-[var(--color-button-action-border)] border-2 rounded-2xl p-2 px-5 mt-5 min-w-[270px]">Cadastrar novo Item no Cardápio</Link>
         </div>
        <div className="flex flex-col gap-10 flex-wrap justify-center items-center">
-         
+            {cardapios.map((cardapio, index) => (
+               <TabelaCardapio key={index}  cardapio={cardapio}/>
+            ))}
        </div>
       </>
    )

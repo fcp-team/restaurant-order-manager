@@ -1,7 +1,48 @@
+"use client"
+
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Link from "next/link";
 
 export default function CadastroCardapio(){
+
+   const [nome, setNome] = useState("");
+
+   async function cadastrarCardapio(event: any){
+      event.preventDefault();
+
+      if(!nome){
+         alert("Preencha todos os campos");
+         return;
+      }
+
+      try {
+         const response = await fetch("/api/menu/criar", {
+         method: "POST",
+         headers: {
+            "Content-Type": "application/json",
+         },
+         body: JSON.stringify({
+            nome: nome,
+            itens: []
+         }),
+         });
+
+         const data = await response.json();
+
+         if (!response.ok) {
+         throw new Error(data.message || "Erro ao cadastrar");
+         }
+
+         console.log("Sucesso:", data);
+         alert("Cardápio criado com sucesso!");
+
+      } catch (err) {
+         console.error(err);
+         alert("Erro ao criar cardápio");
+      }
+   }
+
    return(   
       <>
         <Header/>
@@ -13,18 +54,22 @@ export default function CadastroCardapio(){
           </Link>
             <div className="w-full max-w-96 flex flex-col justify-center bg-[var(--color-surface)] rounded-2xl shadow-lg p-7 py-4 m-10 mt-5 mx-auto border-2 border-[var(--color-surface-border)]">
                <h2 className="text-3xl text-center m-3 mb-4">Cadastro de Cardápio</h2>
-               <form action="" method="post" className="flex flex-col">
+               <form onSubmit={cadastrarCardapio} className="flex flex-col">
 
-                     <div className="mb-5">
-                     <label htmlFor="nomeCardapio" className="block text-[var(--color-text-primary)]-700 font-medium mb-2">Nome do Cardápio</label>
-                     <input type="text" name="nomeCardapio" id="nomeCardapio" placeholder="Nome do Cardápio" required className="w-full px-4 py-2 border border-gray-300 rounded-md bg-cyan-50 focus:outline-none focus:ring-2 focus:caret-green-950"/>
+                     <div className="mb-1">
+                     <label htmlFor="nomeCardapio" className="block text-[var(--color-text-primary)] font-medium mb-2">Nome do Cardápio</label>
+                     <input 
+                     value={nome}
+                     onChange={(e) => setNome(e.target.value)}
+                     type="text"
+                     name="nomeCardapio" 
+                     id="nomeCardapio" 
+                     placeholder="Nome do Cardápio"
+                     required 
+                     className="w-full px-4 py-2 border border-gray-300 rounded-md bg-cyan-50 focus:outline-none focus:ring-2 focus:caret-green-950"
+                     />
                      </div>
-
-                     <div>
-                        <label htmlFor="descricaoCardapio" className="block text-[var(--color-text-primary)]-700 font-medium mb-2">Descriçao do Cardapio</label>
-                     <input type="text" name="descricaoCardapio" id="descricaoCardapio" placeholder="Descriçao do Cardapio" required className="w-full px-4 py-2 border border-gray-300 rounded-md bg-cyan-50 focus:outline-none focus:ring-2 focus:caret-green-950"/>
-                     </div>
-
+              
                      <input type="submit" value="Cadastrar" className="cursor-pointer bg-[var(--color-button-auth)] transition duration-300 hover:bg-[var(--color-button-auth-hover)] rounded-2xl p-2 px-5 my-9 min-w-[200px] shadow-md text-[var(--color-text-inverse)] font-bold"/>
                </form>
             </div>
