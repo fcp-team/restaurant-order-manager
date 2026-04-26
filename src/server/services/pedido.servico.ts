@@ -1,5 +1,5 @@
 import { IRepositorioPedido } from "../repositories/pedido.repositorio"
-import { IRepositorioMenu } from "../repositories/menu.repositorio"
+import { IRepositorioMenu, RepositorioMenu } from "../repositories/menu.repositorio"
  
 import { Pedido, StatusPedido } from "../classes/pedido"
 import { ItemPedido, StatusItemPedido } from "../classes/item-pedido"
@@ -19,7 +19,7 @@ export type NovoPedidoPayload = {
 export default class ServicoPedido {
   constructor(
     private repositorio: IRepositorioPedido,
-    private repositorioMenu: IRepositorioMenu,
+    private repositorioMenu: IRepositorioMenu = new RepositorioMenu(),
   ) { }
  
   async criarPedido(payload: NovoPedidoPayload): Promise<Pedido> {
