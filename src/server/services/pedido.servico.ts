@@ -2,11 +2,6 @@ import { IRepositorioPedido } from "../repositories/pedido.repositorio"
 
 import { Pedido, StatusPedido } from "../classes/pedido"
 import { ItemPedido, StatusItemPedido } from "../classes/item-pedido"
-import { promises } from "dns"
-
-interface ServicoAutorizacao {
-  autorizar(): boolean
-}
 
 export type NovoPedidoItemPayload = {
   idItemMenu: string
@@ -22,7 +17,6 @@ export type NovoPedidoPayload = {
 export default class ServicoPedido {
   constructor(
     private repositorio: IRepositorioPedido,
-    // private autorizacao: ServicoAutorizacao
   ) { }
 
   async criarPedido(payload: NovoPedidoPayload): Promise<Pedido> {

@@ -1,17 +1,28 @@
 import { NextResponse } from "next/server"
 import { RepositorioMenu } from "@/server/repositories/menu.repositorio"
 import ServicoMenu from "@/server/services/menu.servico"
- 
+
 const servicoMenu = new ServicoMenu(new RepositorioMenu())
- 
-export async function GET() {
+
+export async function GET(request: Request) {
   try {
-    const menus = await servicoMenu.listarMenus()
-    return NextResponse.json(menus)
+    const { searchParams } = new URL(request.url)
+    const idMenu = searchParams.get("id-menu")
+
+    if (idMenu) {
+      const menu = await servicoMenu.buscarMenu(idMenu)
+      return NextResponse.json(menu)
+    }
+
+    return NextResponse.json(
+      { error: "O parâmetro 'id-menu' é obrigatório" },
+      { status: 400 }
+    )
+
   } catch (reason) {
     console.error(reason)
     return NextResponse.json(
-      { error: "Erro ao listar menus" },
+      { error: "Erro ao buscar menu" },
       { status: 500 }
     )
   }
