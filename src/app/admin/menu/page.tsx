@@ -9,19 +9,22 @@ export default function Menu(){
 
    const [cardapios, setCardapios] = useState([]);
 
+   async function carregarCardapios() {
+  try {
+    const res = await fetch("/api/menus");
+    const data = await res.json();
+
+    console.log("Cardapios recebidos:", data);
+    setCardapios(data);
+
+   } catch (err) {
+      console.error(err);
+   }
+   } 
+   
+
    useEffect(() => {
-   fetch("/api/menus", {
-      method: "GET",
-      headers: {
-         "Content-Type": "application/json",
-      },
-   })
-      .then(res => res.json())
-      .then(data => {
-         console.log("Cardapios recebidos:", data);
-         setCardapios(data);
-      })
-      .catch(err => console.error(err));
+      carregarCardapios();
    }, []);
 
    return(   
@@ -39,7 +42,7 @@ export default function Menu(){
         </div>
        <div className="flex flex-col gap-10 flex-wrap justify-center items-center">
             {cardapios.map((cardapio, index) => (
-               <TabelaCardapio key={index}  cardapio={cardapio}/>
+               <TabelaCardapio atualizarLista={carregarCardapios} key={index}  cardapio={cardapio}/>
             ))}
        </div>
       </>
