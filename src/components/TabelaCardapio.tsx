@@ -1,9 +1,9 @@
+ import { useState } from "react";
+ 
  type TabelaCardapioProps = {
     cardapio: Record<string, any>,
     atualizarLista: () => Promise<void>;
 }
-
-import { useState } from "react";
 
 export default function TabelaCardapio({cardapio, atualizarLista}: TabelaCardapioProps){
 
@@ -33,7 +33,7 @@ export default function TabelaCardapio({cardapio, atualizarLista}: TabelaCardapi
          return;
       }
 
-      const precoFormatado = parseFloat(preco.replace(",", "."));
+      const precoFormatado = preco ? parseFloat(preco.replace(",", ".")) : undefined;
 
       try {
          const response = await fetch("/api/menu/item/atualizar", {
@@ -45,9 +45,9 @@ export default function TabelaCardapio({cardapio, atualizarLista}: TabelaCardapi
                 idMenu: cardapio.id,
                 idItem: ItemId,
                 payload: {
-                    nome: nome,
-                    preco: precoFormatado,
-                    descricao: descricao
+                    nome: nome || undefined,
+                    descricao: descricao || undefined,
+                    ...(precoFormatado ? { preco: precoFormatado} : {})
                 }
             }),
          });
