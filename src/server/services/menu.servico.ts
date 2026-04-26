@@ -71,13 +71,38 @@ export default class ServicoMenu {
     return await this.repositorio.removerItem(idMenu, idItem)
   }
  
-  async atualizarItem(idMenu: string, idItem: string, payload: ItemMenuPayload): Promise<ItemMenu | null> {
-    if (!payload.nome) throw new Error("Nome do item é obrigatório")
-    if (payload.preco < 0) throw new Error("Preço do item não pode ser negativo")
+  async atualizarItem(idMenu: string, idItem: string, payload: Partial<ItemMenuPayload>): Promise<ItemMenu | null> {
+    const camposEnviados = Object.keys(payload).filter(k => (payload as any)[k] !== undefined)
+    if (camposEnviados.length === 0) {
+      throw new Error("Nenhum campo foi enviado para atualização")
+    }
  
-    const item = await this.buscarItem(idMenu, idItem) // valida se existe
-    item.alterarPreco(payload.preco)
-    item.alterarDescricao(payload.descricao ?? item.Descricao)
+    if (payload.nome !== undefined) {
+      if (typeof payload.nome !== "string" || !payload.nome.trim()) {
+        throw new Error("Nome do item deve ser uma string não vazia")
+      }
+    }
+ 
+    if (payload.preco !== undefined) {
+      if (typeof payload.preco !== "number" || isNaN(payload.preco)) {
+        throw new Error("Preço do item deve ser um número válido")
+      }
+      if (payload.preco < 0) {
+        throw new Error("Preço do item não pode ser negativo")
+      }
+    }
+ 
+    if (payload.descricao !== undefined) {
+      if (typeof payload.descricao !== "string" || !payload.descricao.trim()) {
+        throw new Error("Descrição do item deve ser uma string não vazia")
+      }
+    }
+ 
+    const item = await this.buscarItem(idMenu, idItem)
+ 
+    if (payload.nome !== undefined) item.alterarNome(payload.nome.trim())
+    if (payload.preco !== undefined) item.alterarPreco(payload.preco)
+    if (payload.descricao !== undefined) item.alterarDescricao(payload.descricao.trim())
  
     return await this.repositorio.atualizarItem(idMenu, item)
   }
