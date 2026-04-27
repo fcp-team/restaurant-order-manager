@@ -34,7 +34,7 @@ RUN chown -R node:node /app
 USER node
 
 # Expose the port that the application listens on.
-EXPOSE 5050
+EXPOSE 3000
 
 # Run the application.
 CMD ["npm", "run", "dev"]
