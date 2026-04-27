@@ -38,5 +38,6 @@ export const config = {
   matcher: [
     "/api/pedido/:path*",
     "/api/pedidos",
+    "/api/auth/registrar"
   ]
 }
