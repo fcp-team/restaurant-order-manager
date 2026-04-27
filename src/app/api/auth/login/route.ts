@@ -19,7 +19,12 @@ export async function POST(request: Request) {
     const usuario = await servicoUsuario.autenticarUsuario(email, senha)
     const token = gerarToken(usuario)
 
-    const response = NextResponse.json({ message: "Login realizado com sucesso!" })
+    const route = "/" + usuario.funcao.toLowerCase()
+
+    const response = NextResponse.json({
+      message: "Login realizado com sucesso!",
+      redirectTo: route
+    })
 
     response.cookies.set("auth_token", token, {
       httpOnly: true,
