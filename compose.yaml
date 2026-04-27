@@ -2,6 +2,7 @@ services:
   app:
     build:
       context: .
+      target: final
     container_name: restaurant-order-manager-app
     environment:
       NODE_ENV: production
@@ -22,7 +23,7 @@ services:
   app-dev:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      target: dev
     container_name: restaurant-order-manager-dev
     environment:
       NODE_ENV: development
@@ -35,7 +36,7 @@ services:
       JWT_SECRET: 4bb7c591820bc6654219df61d4fe28adc2bc4457a5a757081af0829a5d9b5b887d96d16f39582b569878a8d0979caa1a942ce911260de0f8769a797fb458c0fb
       JWT_EXPIRES_IN: 1h
     ports:
-      - "5050:3000"
+      - "5500:3000"
     depends_on:
       - db
     restart: always
