@@ -1,6 +1,7 @@
 import pool from "@/lib/db"
 import { ResultSetHeader, RowDataPacket } from "mysql2"
-import { Usuario, Funcao } from "../classes/usuario"
+import { Usuario } from "../classes/usuario"
+import { Funcao } from "@/lib/enums/funcao"
 
 export interface IRepositorioUsuario {
   criarUsuario(usuario: Usuario): Promise<void>

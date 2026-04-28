@@ -1,0 +1,97 @@
+"use client"
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { SubmitEvent, useRef } from "react";
+
+import { UsuarioPayload } from "@/lib/dtos/usuario";
+import { Funcao } from "@/lib/enums/funcao";
+
+export default function CadastroMembro() {
+  const router = useRouter()
+
+  const inputUsuarioRef = useRef<HTMLInputElement>(null)
+  const inputEmailRef = useRef<HTMLInputElement>(null)
+  const inputSenhaRef = useRef<HTMLInputElement>(null)
+  const selectFuncaoRef = useRef<HTMLSelectElement>(null)
+
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const formData = new FormData(event.currentTarget)
+
+    const data: UsuarioPayload = {
+      nome: String(formData.get("usuario")),
+      email: String(formData.get("email")),
+      senha: String(formData.get("senha")),
+      funcao: String(formData.get("funcao")) as Funcao
+    }
+
+    if (!data.nome || !data.email || !data.senha || !data.funcao) {
+      alert("Preencha todos os campos")
+      return
+    }
+
+    try {
+      await fetch("/api/usuarios/criar", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(data)
+      })
+
+      router.push("/admin")
+
+    } catch (reason) {
+      console.error(reason)
+      alert("Falha ao registrar usuário")
+    
+    } finally {
+      formData.keys().forEach((key) => formData.set(key, ""))
+      inputUsuarioRef.current!.value = ""
+      inputEmailRef.current!.value = ""
+      inputSenhaRef.current!.value = ""
+      selectFuncaoRef.current!.value = ""
+    }
+  }
+
+  return (
+    <>
+      <div className="w-full max-w-96 flex flex-col justify-center bg-[var(--color-surface)] rounded-2xl shadow-lg p-7 py-4 m-10 mx-auto border-2 border-[var(--color-surface-border)]">
+        <h2 className="text-3xl text-center m-3 mb-3">Cadastro</h2>
+        <p className="text-center mb-7">Gerenciamento de Pedidos</p>
+
+        <form action="" method="post" className="flex flex-col" onSubmit={(e) => handleSubmit(e)}>
+          <div className="mb-5">
+            <label htmlFor="usuario" className="block text-[var(--color-text-primary)]-700 font-medium mb-2">Usuário</label>
+            <input type="text" name="usuario" id="usuario" placeholder="Usuário" required ref={inputUsuarioRef} className="w-full px-4 py-2 border border-gray-300 rounded-md bg-cyan-50 focus:outline-none focus:ring-2 focus:caret-green-950" />
+          </div>
+
+          <div className="mb-5">
+            <label htmlFor="email" className="block text-[var(--color-text-primary)]-700 font-medium mb-2">Email</label>
+            <input type="email" name="email" id="email" placeholder="Email" required ref={inputEmailRef} className="w-full px-4 py-2 border border-gray-300 rounded-md bg-cyan-50 focus:outline-none focus:ring-2 focus:caret-green-950" />
+          </div>
+
+          <div className="mb-5">
+            <label htmlFor="senha" className="block text-[var(--color-text-primary)]-700 font-medium mb-2">Senha</label>
+            <input type="password" name="senha" id="senha" placeholder="Senha" required minLength={7} ref={inputSenhaRef} className="w-full px-4 py-2 border border-gray-300 rounded-md bg-cyan-50 focus:outline-none focus:ring-2 focus:caret-green-950" />
+          </div>
+
+          <div>
+            <label htmlFor="funcao" className="block text-[var(--color-text-primary)]-700 font-medium mb-2">Função</label>
+            <select name="funcao" id="funcao" required ref={selectFuncaoRef} className="w-full px-4 py-2 border border-gray-300 rounded-md bg-cyan-50 focus:outline-none focus:ring-2 focus:caret-green-950">
+              <option value="">Selecionar</option>
+              {Object.values(Funcao).map((funcao, i) => (
+                <option key={i} value={funcao}>{funcao}</option>
+              ))}
+            </select>
+          </div>
+
+          <input type="submit" value="Cadastrar" className="cursor-pointer bg-[var(--color-button-auth)] transition duration-300 hover:bg-[var(--color-button-auth-hover)] rounded-2xl p-2 px-5 my-9 min-w-[200px] shadow-md text-[var(--color-text-inverse)] font-bold" />
+        </form>
+      </div>
+      <div className="flex justify-center items-center">
+        <Link href="/admin" className="mb-5 text-center underline text-[var(--color-button-auth)] transition duration-300 hover:text-[var(--color-button-auth-hover)]">Voltar</Link>
+      </div>
+    </>
+  );
+}

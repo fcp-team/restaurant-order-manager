@@ -1,8 +1,4 @@
-export enum Funcao {
-  ADMIN = "ADMIN",
-  GARCOM = "GARCOM",
-  COZINHA = "COZINHA"
-}
+import { Funcao } from "@/lib/enums/funcao"
 
 export class Usuario {
 
