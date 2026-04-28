@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { autorizar, verificarToken } from "./server/lib/auth";
+import { autorizar, verificarToken } from "./lib/auth";
 
 export async function proxy(request: NextRequest) {
   try {
@@ -10,7 +10,7 @@ export async function proxy(request: NextRequest) {
     const usuario = verificarToken(token)
 
     const { pathname } = request.nextUrl
-    
+
     if (pathname.startsWith("/api/pedidos")) {
       return NextResponse.next()
     }
@@ -38,6 +38,7 @@ export const config = {
   matcher: [
     "/api/pedido/:path*",
     "/api/pedidos",
-    "/api/auth/registrar"
+    "/api/usuarios/:path*",
+    // "/api/auth/registrar"
   ]
 }

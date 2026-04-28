@@ -1,5 +1,6 @@
 import jwt, { Secret, SignOptions } from "jsonwebtoken"
-import { Funcao, Usuario } from "@/server/classes/usuario"
+import { Usuario } from "@/server/classes/usuario"
+import { Funcao } from "./enums/funcao"
 
 const rotasPorFuncao: Record<Funcao, string[]> = {
   [Funcao.ADMIN]: [

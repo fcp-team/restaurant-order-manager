@@ -1,12 +1,7 @@
 import { IRepositorioUsuario } from "../repositories/usuario.repositorio"
-import { Usuario, Funcao } from "../classes/usuario"
-
-export type UsuarioPayload = {
-  nome: string
-  email: string
-  senha: string
-  funcao: Funcao
-}
+import { Usuario } from "../classes/usuario"
+import { UsuarioPayload } from "@/lib/dtos/usuario"
+import { Funcao } from "@/lib/enums/funcao"
 
 export default class ServicoUsuario {
   constructor(

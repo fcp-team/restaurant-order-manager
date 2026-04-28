@@ -1,10 +1,15 @@
 "use client"
 
-import { Funcao } from "@/server/classes/usuario";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { SubmitEvent, useRef } from "react";
 
+import { UsuarioPayload } from "@/lib/dtos/usuario";
+import { Funcao } from "@/lib/enums/funcao";
+
 export default function CadastroMembro() {
+  const router = useRouter()
+
   const inputUsuarioRef = useRef<HTMLInputElement>(null)
   const inputEmailRef = useRef<HTMLInputElement>(null)
   const inputSenhaRef = useRef<HTMLInputElement>(null)
@@ -13,23 +18,39 @@ export default function CadastroMembro() {
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const data = {
-      nome: inputUsuarioRef.current?.value,
-      email: inputEmailRef.current?.value,
-      senha: inputSenhaRef.current?.value,
-      funcao: selectFuncaoRef.current?.value
+    const formData = new FormData(event.currentTarget)
+
+    const data: UsuarioPayload = {
+      nome: String(formData.get("usuario")),
+      email: String(formData.get("email")),
+      senha: String(formData.get("senha")),
+      funcao: String(formData.get("funcao")) as Funcao
+    }
+
+    if (!data.nome || !data.email || !data.senha || !data.funcao) {
+      alert("Preencha todos os campos")
+      return
     }
 
     try {
-      const response = await fetch("/api/auth/registrar", {
+      await fetch("/api/usuarios/criar", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(data)
       })
-      console.log(response)
+
+      router.push("/admin")
+
     } catch (reason) {
       console.error(reason)
       alert("Falha ao registrar usuário")
+    
+    } finally {
+      formData.keys().forEach((key) => formData.set(key, ""))
+      inputUsuarioRef.current!.value = ""
+      inputEmailRef.current!.value = ""
+      inputSenhaRef.current!.value = ""
+      selectFuncaoRef.current!.value = ""
     }
   }
 
@@ -57,8 +78,8 @@ export default function CadastroMembro() {
 
           <div>
             <label htmlFor="funcao" className="block text-[var(--color-text-primary)]-700 font-medium mb-2">Função</label>
-            <select name="funcao" id="funcao" defaultValue="null" ref={selectFuncaoRef} className="w-full px-4 py-2 border border-gray-300 rounded-md bg-cyan-50 focus:outline-none focus:ring-2 focus:caret-green-950">
-              <option value="null">Selecionar</option>
+            <select name="funcao" id="funcao" required ref={selectFuncaoRef} className="w-full px-4 py-2 border border-gray-300 rounded-md bg-cyan-50 focus:outline-none focus:ring-2 focus:caret-green-950">
+              <option value="">Selecionar</option>
               {Object.values(Funcao).map((funcao, i) => (
                 <option key={i} value={funcao}>{funcao}</option>
               ))}
@@ -69,7 +90,7 @@ export default function CadastroMembro() {
         </form>
       </div>
       <div className="flex justify-center items-center">
-        <Link href={"/login"} className="mb-5 text-center underline text-[var(--color-button-auth)] transition duration-300 hover:text-[var(--color-button-auth-hover)]">Voltar</Link>
+        <Link href="/admin" className="mb-5 text-center underline text-[var(--color-button-auth)] transition duration-300 hover:text-[var(--color-button-auth-hover)]">Voltar</Link>
       </div>
     </>
   );

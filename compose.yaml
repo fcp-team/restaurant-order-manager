@@ -38,7 +38,7 @@ services:
     ports:
       - "5500:3000"
     depends_on:
-      - db
+      - db-test
     restart: always
     develop:
       watch:
