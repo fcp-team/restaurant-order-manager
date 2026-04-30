@@ -18,7 +18,6 @@ services:
       - 3000:3000
     depends_on:
       - db
-    restart: always
 
   app-dev:
     build:
@@ -39,7 +38,6 @@ services:
       - "5500:3000"
     depends_on:
       - db-test
-    restart: always
     develop:
       watch:
         - path: .
@@ -57,7 +55,6 @@ services:
     volumes:
       - db-data:/var/lib/mysql
       - ./database/initial-schema.sql:/docker-entrypoint-initdb.d/initial-schema.sql
-    restart: always
 
   db-test:
     image: mysql:8
@@ -70,7 +67,6 @@ services:
     volumes:
       - db-data-test:/var/lib/mysql
       - ./database/initial-schema.sql:/docker-entrypoint-initdb.d/initial-schema.sql
-    restart: always
 
 volumes:
   db-data:
