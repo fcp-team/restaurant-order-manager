@@ -1,3 +1,5 @@
+import bcrypt from 'bcrypt'
+
 import { IRepositorioUsuario } from "../repositories/usuario.repositorio"
 import { Usuario } from "../classes/usuario"
 import { UsuarioPayload } from "@/lib/dtos/usuario"
@@ -12,12 +14,23 @@ export default class ServicoUsuario {
     if (!usuario.nome || !usuario.email || !usuario.senha || !usuario.funcao) {
       throw new Error("Todos os campos são obrigatórios")
     }
+
+    if (!usuario.email.includes("@")) {
+      throw new Error("Email inválido")
+    }
+
+    if (!Object.values(Funcao).includes(usuario.funcao)) {
+      throw new Error("Função inválida")
+    }
+
+    const saltRounds = 10
+    const senhaHash = await bcrypt.hash(usuario.senha, saltRounds)
     
     const novoUsuario = new Usuario(
       "0",
       usuario.nome,
       usuario.email,
-      usuario.senha,
+      senhaHash,
       usuario.funcao
     )
     
@@ -30,19 +43,20 @@ export default class ServicoUsuario {
       throw new Error("Email e senha são obrigatórios")
     }
 
-    const usuarios = await this.repositorio.listarUsuarios()
-    const usuario = usuarios.find(
-      (item) => item.email.toLowerCase() === email.toLowerCase()
-    )
-
-    if (!usuario || usuario.senha !== senha) {
-      throw new Error("Credenciais inválidas")
+    if (!email.includes("@")) {
+      throw new Error("Email inválido")
     }
+
+    const usuario = await this.repositorio.buscarPorEmail(email)
+    if (!usuario) throw new Error("Credenciais inválidas")
+
+    const senhaValida = await bcrypt.compare(senha, usuario.senha)
+    if (!senhaValida) throw new Error("Credenciais inválidas")
 
     return usuario
   }
   
-  async buscarUsuario(id: number): Promise<Usuario> {
+  async buscarUsuario(id: string): Promise<Usuario> {
     const usuario = await this.repositorio.buscarUsuario(id)
 
     if (!usuario) {
@@ -60,7 +74,7 @@ export default class ServicoUsuario {
     return await this.repositorio.listarPorFuncao(funcao)
   }
 
-  async atualizarUsuario(id: number, payload: UsuarioPayload): Promise<Usuario> {
+  async atualizarUsuario(id: string, payload: UsuarioPayload): Promise<Usuario> {
     const usuario = await this.repositorio.buscarUsuario(id)
 
     if (!usuario) {
@@ -74,7 +88,7 @@ export default class ServicoUsuario {
     return await this.repositorio.atualizarUsuario(usuario)
   }
 
-  async removerUsuario(id: number): Promise<void> {
+  async removerUsuario(id: string): Promise<void> {
     const usuario = await this.repositorio.buscarUsuario(id)
 
     if (!usuario) {
