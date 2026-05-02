@@ -9,6 +9,14 @@ export async function proxy(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl
 
+    if (pathname === "/") {
+      const admins = await new ServicoUsuario(new RepositorioUsuario())
+        .listarPorFuncao(Funcao.ADMIN) || []
+
+      if (admins.length > 0) return NextResponse.redirect(new URL("/login", request.url))
+      return NextResponse.redirect(new URL("/cadastro", request.url))
+    }
+
     if (
       pathname.startsWith("/cadastro") ||
       pathname.startsWith("/api/auth/cadastrar")
@@ -58,6 +66,7 @@ export const config = {
     "/api/pedidos",
     "/api/usuarios/:path*",
     "/api/auth/cadastrar",
-    "/cadastro"
+    "/cadastro",
+    "/"
   ]
 }
