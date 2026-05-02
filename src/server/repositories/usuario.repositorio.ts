@@ -1,11 +1,13 @@
 import pool from "@/lib/db"
 import { ResultSetHeader, RowDataPacket } from "mysql2"
-import { Usuario, Funcao } from "../classes/usuario"
+import { Usuario } from "../classes/usuario"
+import { Funcao } from "@/lib/enums/funcao"
 
 export interface IRepositorioUsuario {
   criarUsuario(usuario: Usuario): Promise<void>
-  buscarUsuario(id: number): Promise<Usuario | null>
-  removerUsuario(id: number): Promise<void>
+  buscarUsuario(id: string): Promise<Usuario | null>
+  buscarPorEmail(email: string): Promise<Usuario | null>
+  removerUsuario(id: string): Promise<void>
   listarUsuarios(): Promise<Usuario[]>
   listarPorFuncao(funcao: Funcao): Promise<Usuario[]>
   atualizarUsuario(usuario: Usuario): Promise<Usuario>
@@ -35,11 +37,32 @@ export class RepositorioUsuario implements IRepositorioUsuario {
     }
   }
 
-  async buscarUsuario(id: number): Promise<Usuario | null> {
+  async buscarUsuario(id: string): Promise<Usuario | null> {
     const [rows] = await pool.execute<RowDataPacket[]>(
       `SELECT * FROM Usuarios 
        WHERE id_usuario = ? AND excluido = 0`,
       [id]
+    )
+
+    if (rows.length === 0) return null
+
+    const row = rows[0]
+
+    return new Usuario(
+      row.id_usuario,
+      row.nome,
+      row.email,
+      row.senha,
+      row.funcao as Funcao,
+      Boolean(row.excluido)
+    )
+  }
+
+  async buscarPorEmail(email: string): Promise<Usuario | null> {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      `SELECT * FROM Usuarios 
+       WHERE email = ? AND excluido = 0`,
+      [email]
     )
 
     if (rows.length === 0) return null
@@ -99,7 +122,7 @@ export class RepositorioUsuario implements IRepositorioUsuario {
     return usuario
   }
 
-  async removerUsuario(id: number): Promise<void> {
+  async removerUsuario(id: string): Promise<void> {
     await pool.execute(
       `UPDATE Usuarios 
        SET excluido = 1 

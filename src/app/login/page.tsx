@@ -1,17 +1,17 @@
 "use client"
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { SubmitEvent } from "react";
 
 export default function Login() {
   const router = useRouter();
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const senha = formData.get("senha") as string;
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email"));
+    const senha = String(formData.get("senha"));
 
     const response = await fetch("/api/auth/login", {
       method: "POST",
@@ -24,7 +24,7 @@ export default function Login() {
     const data = await response.json();
 
     if (!response.ok) {
-      return;
+      alert("Falha ao realizar login: " + data.error)
     }
 
     // Login bem-sucedido
