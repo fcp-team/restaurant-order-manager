@@ -14,11 +14,6 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 # Development stage
 FROM deps AS dev
 ENV NODE_ENV development
-ENV WATCHPACK_POLLING true
-COPY . .
-
-RUN chown -R node:node /app
-USER node
 
 EXPOSE 3000
 CMD ["npm", "run", "dev"]
