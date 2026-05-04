@@ -67,6 +67,9 @@ export const config = {
     "/api/usuarios/:path*",
     "/api/auth/cadastrar",
     "/cadastro",
-    "/"
+    "/",
+    "/admin/:path*",
+    "/garcom/:path*",
+    "/cozinha/:path*"
   ]
 }
