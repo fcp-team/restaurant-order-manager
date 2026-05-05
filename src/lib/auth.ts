@@ -7,6 +7,7 @@ const rotasPorFuncao: Record<Funcao, string[]> = {
     "",
   ],
   [Funcao.GARCOM]: [
+    "/garcom",
     "/api/pedido/criar",
     "/api/pedido/atualizar-status",
     "/api/pedido/item/adicionar",
@@ -14,9 +15,12 @@ const rotasPorFuncao: Record<Funcao, string[]> = {
     "/api/pedido/item/remover",
     "/api/pedido/item/reduzir",
     "/api/pedido/item/adicionar",
+    // "/api/usuarios/[id]/atualizar",
   ],
   [Funcao.COZINHA]: [
+    "/cozinha",
     "/api/pedido/item/atualizar-status",
+    // "/api/usuarios/[id]/atualizar",
   ]
 }
 
