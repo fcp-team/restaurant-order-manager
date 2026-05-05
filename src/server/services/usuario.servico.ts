@@ -74,16 +74,27 @@ export default class ServicoUsuario {
     return await this.repositorio.listarPorFuncao(funcao)
   }
 
-  async atualizarUsuario(id: string, payload: UsuarioPayload): Promise<Usuario> {
+  async atualizarUsuario(id: string, payload: Partial<UsuarioPayload>): Promise<Usuario> {
+    const { nome, email, senha, funcao } = payload
+
+    if (!nome && !email && !senha && !funcao) {
+      throw new Error("Pelo menos um campo deve ser fornecido para atualização")
+    }
+
+    if (email && !email.includes("@")) {
+      throw new Error("Email inválido")
+    }
+
     const usuario = await this.repositorio.buscarUsuario(id)
 
     if (!usuario) {
       throw new Error("Usuário não encontrado")
     }
 
-    usuario.nome = payload.nome ?? usuario.nome
-    usuario.email = payload.email ?? usuario.email
-    usuario.senha = payload.senha ?? usuario.senha
+    usuario.nome = nome ?? usuario.nome
+    usuario.email = email ?? usuario.email
+    usuario.senha = senha ?? usuario.senha
+    usuario.funcao = funcao ?? usuario.funcao
 
     return await this.repositorio.atualizarUsuario(usuario)
   }
