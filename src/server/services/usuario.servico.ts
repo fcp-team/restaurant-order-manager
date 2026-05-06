@@ -75,9 +75,9 @@ export default class ServicoUsuario {
   }
 
   async atualizarUsuario(id: string, payload: Partial<UsuarioPayload>): Promise<Usuario> {
-    const { nome, email, senha, funcao } = payload
+    const { nome, email, senha } = payload
 
-    if (!nome && !email && !senha && !funcao) {
+    if (!nome && !email && !senha) {
       throw new Error("Pelo menos um campo deve ser fornecido para atualização")
     }
 
@@ -94,7 +94,6 @@ export default class ServicoUsuario {
     usuario.nome = nome ?? usuario.nome
     usuario.email = email ?? usuario.email
     usuario.senha = senha ?? usuario.senha
-    usuario.funcao = funcao ?? usuario.funcao
 
     return await this.repositorio.atualizarUsuario(usuario)
   }

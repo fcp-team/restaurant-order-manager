@@ -36,7 +36,6 @@ export async function proxy(request: NextRequest) {
 
     const usuario = verificarToken(token)
 
-
     if (pathname.startsWith("/api/pedidos")) {
       return NextResponse.next()
     }
@@ -47,6 +46,24 @@ export async function proxy(request: NextRequest) {
         { error: "Acesso negado" },
         { status: 403 }
       )
+    }
+
+    if (
+      pathname.startsWith("/api/usuarios/") &&
+      pathname.endsWith("/atualizar")
+    ) {
+      if (usuario.funcao === Funcao.ADMIN) return NextResponse.next()
+
+      const idPattern = /\d+/
+      const match = pathname.match(idPattern)
+      const id = match ? match[0] : null
+      
+      if (String(id) !== String(usuario.id_usuario)) {
+        return NextResponse.json(
+          { error: "Acesso negado" },
+          { status: 403 }
+        )
+      }
     }
 
     return NextResponse.next()

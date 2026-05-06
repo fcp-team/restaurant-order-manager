@@ -15,7 +15,7 @@ const rotasPorFuncao: Record<Funcao, string[]> = {
     "/api/pedido/item/remover",
     "/api/pedido/item/reduzir",
     "/api/pedido/item/adicionar",
-    // "/api/usuarios/[id]/atualizar",
+    "/api/usuarios/[id]/atualizar",
   ],
   [Funcao.COZINHA]: [
     "/cozinha",
@@ -39,7 +39,16 @@ export class AuthError extends Error {
 
 export function autorizar(usuario: TokenPayload, pathname: string): boolean {
   const rotasPermitidas = rotasPorFuncao[usuario.funcao] || []
-  return rotasPermitidas.some(rota => pathname.startsWith(rota))
+  return rotasPermitidas.some(rota => {
+
+    if (rota.startsWith("/api/usuarios/")) {
+      const rotaPattern = pathname.replace(/\/\d+\//, "/[id]/")
+      console.log(rota, pathname, rotaPattern)
+      return rotaPattern.startsWith(rota)
+    }
+
+    return pathname.startsWith(rota)
+  })
 }
 
 const JWT_SECRET = process.env.JWT_SECRET as Secret
