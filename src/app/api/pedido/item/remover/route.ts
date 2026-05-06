@@ -7,7 +7,6 @@ const servicoPedido = new ServicoPedido(new RepositorioPedido())
 export async function DELETE(request: Request) {
   try {
     const params = new URL(request.url).searchParams
-    console.log(params)
 
     const idPedido = params.get("id-pedido")
     const idItem = params.get("id-item")
