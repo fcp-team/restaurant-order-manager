@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 
 function OpcoesModal({ closeSettingsFn }: { closeSettingsFn: () => void }) {
@@ -83,7 +84,9 @@ export default function Header() {
 
   return (
     <header className="flex flex-row p-3 px-5 items-center justify-between">
-      <h1 className="text-2xl max-w-72">Pra Já - Gerenciamento de Pedidos</h1>
+      <Image src="/imgs/logo.png" alt="Logo" width={72} height={72} />
+
+      <h1 className="text-xl max-w-72">Gerenciamento de Pedidos</h1>
 
       <button
         type="button"
