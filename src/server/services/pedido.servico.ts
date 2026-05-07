@@ -1,20 +1,11 @@
 import { IRepositorioPedido } from "../repositories/pedido.repositorio"
 import { IRepositorioMenu, RepositorioMenu } from "../repositories/menu.repositorio"
  
-import { Pedido, StatusPedido } from "../classes/pedido"
-import { ItemPedido, StatusItemPedido } from "../classes/item-pedido"
- 
-export type NovoPedidoItemPayload = {
-  idItemMenu: string
-  idMenu: string
-  quantidade: number
-  observacao?: string
-}
- 
-export type NovoPedidoPayload = {
-  numeroMesa: string
-  itens: NovoPedidoItemPayload[]
-}
+import { Pedido } from "../classes/pedido"
+import { ItemPedido } from "../classes/item-pedido"
+import { NovoPedidoPayload, NovoPedidoItemPayload } from "@/lib/dtos/pedido"
+import { StatusPedido } from "@/lib/enums/status-pedido"
+import { StatusItemPedido } from "@/lib/enums/status-item-pedido"
  
 export default class ServicoPedido {
   constructor(

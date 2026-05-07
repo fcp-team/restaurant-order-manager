@@ -1,8 +1,4 @@
-export enum StatusItemPedido {
-  PENDENTE = "PENDENTE",
-  PREPARANDO = "PREPARANDO",
-  PRONTO = "PRONTO"
-}
+import { StatusItemPedido } from "@/lib/enums/status-item-pedido"
 
 export class ItemPedido {
   private id: string | null = null

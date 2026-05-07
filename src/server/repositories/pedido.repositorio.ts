@@ -1,7 +1,9 @@
 import pool from "@/lib/db"
 import { ResultSetHeader, RowDataPacket } from "mysql2"
-import { Pedido, StatusPedido } from "../classes/pedido"
-import { ItemPedido, StatusItemPedido } from "../classes/item-pedido"
+import { Pedido } from "../classes/pedido"
+import { ItemPedido } from "../classes/item-pedido"
+import { StatusItemPedido } from "@/lib/enums/status-item-pedido"
+import { StatusPedido } from "@/lib/enums/status-pedido"
 
 export interface IRepositorioPedido {
   criarPedido(pedido: Pedido): Promise<void>

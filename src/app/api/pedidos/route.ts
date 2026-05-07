@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { RepositorioPedido } from "@/server/repositories/pedido.repositorio"
 import ServicoPedido from "@/server/services/pedido.servico"
-import { StatusPedido } from "@/server/classes/pedido"
+import { StatusPedido } from "@/lib/enums/status-pedido"
 
 const servicoPedido = new ServicoPedido(new RepositorioPedido())
 
