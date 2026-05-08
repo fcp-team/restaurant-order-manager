@@ -81,12 +81,12 @@ export default function TabelaCardapio({cardapio, atualizarLista}: TabelaCardapi
         <div className="overflow-x-auto rounded-lg shadow">
           <table className="min-w-full bg-white">
               
-            <thead className="bg-[var(--color-surface)]">
+            <thead className="bg-(--color-surface)">
               <tr>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-[var(--color-text-highlight)]">Nome</th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-[var(--color-text-highlight)]">Descrição</th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-[var(--color-text-highlight)]">Valor</th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-[var(--color-text-highlight)]">Ações</th>
+                <th className="text-left px-4 py-3 text-sm font-semibold text-(--color-text-highlight)">Nome</th>
+                <th className="text-left px-4 py-3 text-sm font-semibold text-(--color-text-highlight)">Descrição</th>
+                <th className="text-left px-4 py-3 text-sm font-semibold text-(--color-text-highlight)">Valor</th>
+                <th className="text-left px-4 py-3 text-sm font-semibold text-(--color-text-highlight)">Ações</th>
               </tr>
             </thead>
 
@@ -95,14 +95,14 @@ export default function TabelaCardapio({cardapio, atualizarLista}: TabelaCardapi
                 <tr key={item.id} className="hover:bg-gray-50 transition">
                   <td className="px-4 py-3 font-medium text-gray-800">{item.nome}</td>
                   <td className="px-4 py-3 text-gray-600">{item.descricao}</td>
-                  <td className="px-4 py-3 font-semibold text-[var(--color-text-highlight)] whitespace-nowrap">
+                  <td className="px-4 py-3 font-semibold text-(--color-text-highlight) whitespace-nowrap">
                     {new Intl.NumberFormat('pt-BR', {
                       style: 'currency',
                       currency: 'BRL',
                     }).format(item.preco)}
                   </td>
-                  <td className="px-4 py-3 font-semibold text-[var(--color-text-highlight)] whitespace-nowrap">
-                    <button onClick={() => abrirModal(item)} className="cursor-pointer bg-[var(--color-button-auth)] transition duration-300 hover:bg-[var(--color-button-auth-hover)] rounded-2xl p-2 px-4 my-2 shadow-md text-[var(--color-text-inverse)] font-bold">Atualizar</button>
+                  <td className="px-4 py-3 font-semibold text-(--color-text-highlight) whitespace-nowrap">
+                    <button onClick={() => abrirModal(item)} className="cursor-pointer bg-(--color-button-auth) transition duration-300 hover:bg-(--color-button-auth-hover) rounded-2xl p-2 px-4 my-2 shadow-md text-(--color-text-inverse) font-bold">Atualizar</button>
                   </td>
                 </tr>
               ))}

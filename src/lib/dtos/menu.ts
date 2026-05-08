@@ -1,4 +1,4 @@
-export type ItemMenuDTO = {
+export type ItemMenuPayload = {
   id: string
   nome: string
   descricao: string
@@ -8,5 +8,13 @@ export type ItemMenuDTO = {
 export type MenuDTO = {
   id: string
   nome: string
-  itens: ItemMenuDTO[]
+  itens: ItemMenuPayload[]
+}
+
+export type ItemMenuDTO = {
+  id: string
+  idMenu: string
+  nome: string
+  descricao: string
+  preco: number
 }
