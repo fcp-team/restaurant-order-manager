@@ -1,56 +1,33 @@
 "use client"
-import { useState, useEffect, SubmitEvent } from "react"
+import { useState, useEffect, SubmitEvent, ChangeEvent } from "react"
 import Header from "@/components/Header"
 import CardPedidoGarcom from "@/components/CardPedidoGarcom"
 import { getSocket } from "@/lib/ws-client"
 import { ItemMenuDTO, MenuDTO } from "@/lib/dtos/menu"
 import { Pedido } from "@/server/classes/pedido"
-import { NovoItemPedidoPayload, NovoPedidoPayload } from "@/lib/dtos/pedido"
+import { NovoItemPedidoPayload, NovoPedidoPayload, PedidoDTO } from "@/lib/dtos/pedido"
 
-// remove later
-const test = []
-for (let i = 0; i <= 10; i++) {
-  test.push(
-    <li
-      key={i}
-      className="grid grid-cols-[auto_3fr_1fr] items-center gap-4 w-full py-4 px-6 bg-white hover:bg-gray-100">
-      <input
-        type="checkbox"
-        className="size-5"
-      />
-
-      <div>
-        <p className="text-lg font-medium">Teste</p>
-        <p className="text-sm text-gray-600">Teste</p>
-      </div>
-
-      <span>R$ 100,00</span>
-    </li>
-  )
-}
-
-function PedidoForm() {
+function Cardapio(
+  { onSelectItem }: { onSelectItem: (item: ItemMenuDTO) => void }
+) {
   const [menus, setMenus] = useState<MenuDTO[]>([])
   const [itensMenu, setItensMenu] = useState<ItemMenuDTO[]>([])
 
   const [itensFiltrados, setItensFiltrados] = useState<ItemMenuDTO[]>([])
   const [filtroItem, setFiltroItem] = useState<string>("")
 
-  const [itensSelecionados, setItensSelecionados] = useState<ItemMenuDTO[]>([])
-  const [itensPedido, setItensPedido] = useState<NovoItemPedidoPayload[]>([])
-
-  async function carregarMenus() {
-    const res = await fetch("/api/menus")
-    const data: MenuDTO[] = await res.json()
-    setMenus(data)
-    data.forEach(menu => setItensMenu(prev => {
-      const itens: ItemMenuDTO[] = menu.itens.map(item => ({ ...item, idMenu: menu.id }))
-      return [...prev, ...itens]
-    }))
-  }
-
   useEffect(() => {
-    carregarMenus()
+    fetch("/api/menus")
+      .then(res => res.json())
+      .then(res => {
+        const data: MenuDTO[] = res
+        const itens: ItemMenuDTO[] = data.flatMap((menu) => (
+          menu.itens.map(item => ({ ...item, idMenu: menu.id }))
+        ))
+
+        setMenus(data)
+        setItensMenu(itens)
+      })
   }, [])
 
   useEffect(() => {
@@ -62,6 +39,49 @@ function PedidoForm() {
       ))
     )
   }, [itensMenu, filtroItem])
+
+  return (
+    <>
+      <input
+        type="text"
+        placeholder="Pesquisar item"
+        value={filtroItem}
+        onChange={(e) => setFiltroItem(e.target.value)}
+        className="w-full max-w-lg border border-gray-400 rounded-lg p-3 mb-4 bg-white"
+      />
+
+      <ul className="flex flex-col gap-px w-full max-h-[60dvh] overflow-auto rounded-2xl bg-gray-500 shadow">
+        {itensFiltrados.map((item, index) => (
+          <li
+            key={index}
+            className="grid grid-cols-[auto_1fr_auto] items-center gap-4 w-full py-4 px-6 bg-white hover:bg-gray-100">
+            <input
+              type="checkbox"
+              onChange={() => onSelectItem(item)}
+              className="size-5"
+            />
+
+            <div>
+              <p className="text-lg font-medium">{item.nome}</p>
+              <p className="text-sm text-gray-600">{item.descricao}</p>
+            </div>
+
+            <span>
+              {new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              }).format(item.preco)}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </>
+  )
+}
+
+function PedidoForm() {
+  const [itensSelecionados, setItensSelecionados] = useState<ItemMenuDTO[]>([])
+  const [itensPedido, setItensPedido] = useState<NovoItemPedidoPayload[]>([])
 
   useEffect(() => {
     const itens: NovoItemPedidoPayload[] = itensSelecionados.map((item) => ({
@@ -103,8 +123,6 @@ function PedidoForm() {
     ))
   }
 
-  useEffect(() => console.log(itensPedido), [itensPedido])
-
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!itensPedido.length) {
@@ -124,8 +142,6 @@ function PedidoForm() {
       itens: itensPedido
     }
 
-    console.log(pedido)
-
     try {
       const res = await fetch("/api/pedido/criar", {
         method: "POST",
@@ -144,7 +160,7 @@ function PedidoForm() {
   }
 
   return (
-    <div className="w-xl flex flex-col items-center p-8 mx-auto">
+    <>
       <h2 className="text-3xl font-bold mb-8 self-start">Adicionar Pedidos</h2>
 
       <form
@@ -213,54 +229,14 @@ function PedidoForm() {
         </button>
       </form>
 
-      {/* Cardápio */}
-      <input
-        type="text"
-        placeholder="Pesquisar item"
-        value={filtroItem}
-        onChange={(e) => setFiltroItem(e.target.value)}
-        className="w-full max-w-lg border border-gray-400 rounded-lg p-3 mb-4 bg-white"
-      />
-
-      <ul className="flex flex-col gap-px w-full max-h-[60dvh] overflow-auto rounded-2xl bg-gray-500 shadow">
-        {itensFiltrados.map((item, index) => (
-          <li
-            key={index}
-            className="grid grid-cols-[auto_3fr_1fr] items-center gap-4 w-full py-4 px-6 bg-white hover:bg-gray-100">
-            <input
-              type="checkbox"
-              onChange={() => adicionarItem(item)}
-              className="size-5"
-            />
-
-            <div>
-              <p className="text-lg font-medium">{item.nome}</p>
-              <p className="text-sm text-gray-600">{item.descricao}</p>
-            </div>
-
-            <span>
-              {new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-              }).format(item.preco)}
-            </span>
-          </li>
-        ))}
-      </ul>
-
-      {/* <button onClick={() => setMostrarFormulario(false)} className="underline text-sm">
-          Voltar
-        </button> */}
-    </div>
+      <Cardapio onSelectItem={adicionarItem} />
+    </>
   )
 }
 
 export default function Garcom() {
-  const [pedidosProntos, setPedidosProntos] = useState<Pedido[]>([])
-  const [mostrarFormulario, setMostrarFormulario] = useState(false)
-  const [numeroMesa, setNumeroMesa] = useState("")
-  const [nomePrato, setNomePrato] = useState("")
-  const [itensPedido, setItensPedido] = useState<string[]>([])
+  const [mostrarFormulario, setMostrarFormulario] = useState<boolean>(false)
+  const [pedidosProntos, setPedidosProntos] = useState<PedidoDTO[]>([])
 
   useEffect(() => {
     const ws = getSocket()
@@ -281,60 +257,49 @@ export default function Garcom() {
     }
   }, [])
 
-  function adicionarPrato() {
-    if (nomePrato.trim() === "") return
-    setItensPedido([...itensPedido, nomePrato.trim()])
-    setNomePrato("")
-  }
-
-  function removerPrato(index: number) {
-    setItensPedido(itensPedido.filter((_, i) => i !== index))
-  }
-
-  async function criarPedido() {
-    if (numeroMesa.trim() === "" || itensPedido.length === 0) return
-
-    const res = await fetch("/api/pedido/criar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        numeroMesa: Number(numeroMesa),
-        itens: itensPedido.map((nome) => ({ nome })),
-      }),
-    })
-
-    if (res.ok) {
-      setMostrarFormulario(false)
-      setNumeroMesa("")
-      setItensPedido([])
-    }
-  }
-
   return (
     <>
       <Header />
-      <PedidoForm />
 
-      {/* <div className="flex flex-col items-center p-8">
-        <h2 className="text-3xl m-4">Pedidos</h2>
-        <button
-          onClick={() => setMostrarFormulario(true)}
-          className="cursor-pointer bg-[var(--color-button-action)] border-[var(--color-button-action-border)] border-2 rounded-2xl p-2 px-5 mb-12 flex items-center gap-2"
-        >
-          + Adicionar Pedido
-        </button>
+      <div className="w-xl flex flex-col items-center p-8 mx-auto">
+        {mostrarFormulario ?
+          (
+            <>
+              <PedidoForm />
+              <button
+                type="button"
+                onClick={() => setMostrarFormulario(false)}
+                className="w-full max-w-lg p-2 px-5 border-2 rounded-2xl border-(--color-button-action-border) mt-4 bg-(--color-button-action) cursor-pointer"
+              >
+                Cancelar
+              </button>
+            </>
 
-        <h2 className="text-3xl m-4">Pedidos Prontos</h2>
-        <div className="flex flex-row gap-10 flex-wrap justify-center items-center">
-          {pedidosProntos.length === 0 ? (
-            <p className="text-gray-400 mt-4">Nenhum pedido pronto ainda.</p>
-          ) : (
-            pedidosProntos.map((pedido) => (
-              <CardPedidoGarcom key={pedido.id} pedido={pedido} />
-            ))
-          )}
-        </div>
-      </div> */}
+          ) :
+          (
+            <>
+              <h2 className="text-3xl m-4">Pedidos</h2>
+              <button
+                onClick={() => setMostrarFormulario(true)}
+                className="cursor-pointer bg-(--color-button-action) border-(--color-button-action-border) border-2 rounded-2xl p-2 px-5 mb-12 flex items-center gap-2"
+              >
+                + Adicionar pedido
+              </button>
+
+              <h2 className="text-3xl m-4">Pedidos Prontos</h2>
+              <div className="flex flex-row gap-10 flex-wrap justify-center items-center">
+                {pedidosProntos.length === 0 ? (
+                  <p className="text-gray-400 mt-4">Nenhum pedido pronto ainda.</p>
+                ) : (
+                  pedidosProntos.map((pedido) => (
+                    <CardPedidoGarcom key={pedido.id} pedido={pedido} />
+                  ))
+                )}
+              </div>
+            </>
+          )
+        }
+      </div>
     </>
   )
 }
