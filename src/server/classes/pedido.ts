@@ -1,10 +1,6 @@
-import { ItemPedido, StatusItemPedido } from "./item-pedido"
-
-export enum StatusPedido {
-  ABERTO = "ABERTO",
-  FECHADO = "FECHADO",
-  CANCELADO = "CANCELADO"
-}
+import { ItemPedido } from "./item-pedido"
+import { StatusPedido } from "@/lib/enums/status-pedido"
+import { StatusItemPedido } from "@/lib/enums/status-item-pedido"
 
 export class Pedido {
   private id: string | null = null
