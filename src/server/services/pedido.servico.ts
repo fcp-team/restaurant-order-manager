@@ -35,7 +35,7 @@ export default class ServicoPedido {
         itemMenu.Nome,
         i.quantidade,
         itemMenu.Preco,
-        i.quantidade
+        i.observacao
       ))
     }
     const pedido = new Pedido(numeroMesa, pedidoItens)
@@ -62,7 +62,7 @@ export default class ServicoPedido {
       itemMenu.Nome,
       itemPayload.quantidade,
       itemMenu.Preco,
-      itemPayload.quantidade
+      itemPayload.observacao
     )
 
     const pedido = await this.repositorio.adicionarItem(idPedido, novoItem)

@@ -24,7 +24,7 @@ export type NovoItemPedidoPayload = {
   idItemMenu: string
   idMenu: string
   quantidade: number
-  quantidade?: string
+  observacao?: string
 }
 
 export type NovoPedidoPayload = {

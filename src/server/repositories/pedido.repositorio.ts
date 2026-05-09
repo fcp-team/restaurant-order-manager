@@ -25,19 +25,14 @@ export class RepositorioPedido implements IRepositorioPedido {
       await conn.beginTransaction()
 
       const [res] = await conn.execute<ResultSetHeader>(
-        `INSERT INTO Pedidos (id_usuario, id_restaurante, mesa, abertura, total, status) VALUES (?, ?, ?, ?, ?, ?)`,
-        [1, 1, pedido.numeroMesa, pedido.CriadoEm, pedido.calcularTotal(), "aberto"]
+        `INSERT INTO Pedidos (id_usuario, mesa, abertura, total, status) VALUES (?, ?, ?, ?, ?)`,
+        [1, pedido.numeroMesa, pedido.CriadoEm, pedido.calcularTotal(), "aberto"]
       )
 
       const idPedido = res.insertId
       pedido.Id = String(idPedido)
 
       for (const item of pedido.Itens) {
-        // buscar dados do item no menu (nome, valor)
-        // const [rows] = await conn.execute<RowDataPacket[]>(`SELECT nome, valor FROM Itens WHERE id_item = ? AND excluido = 0`, [item.idItemMenu])
-        // const menu = rows[0]
-        // if (!menu) throw new Error("Item de menu não encontrado")
-
         const [r] = await conn.execute<ResultSetHeader>(
           `INSERT INTO ItensPedidos (id_pedido, id_item, quantidade, nota, status) VALUES (?, ?, ?, ?, ?)`,
           [idPedido, item.IdItemMenu, item.Quantidade, item.observacao ?? null, "preparando"]
