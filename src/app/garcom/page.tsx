@@ -7,9 +7,15 @@ import { ItemMenuDTO, MenuDTO } from "@/lib/dtos/menu"
 import { Pedido } from "@/server/classes/pedido"
 import { NovoItemPedidoPayload, NovoPedidoPayload, PedidoDTO } from "@/lib/dtos/pedido"
 
-function Cardapio(
-  { onSelectItem }: { onSelectItem: (item: ItemMenuDTO) => void }
-) {
+function Cardapio({
+  onSelectItem,
+  itensSelecionados,
+  onRemoveItem
+}: {
+  onSelectItem: (item: ItemMenuDTO) => void,
+  itensSelecionados: ItemMenuDTO[],
+  onRemoveItem: (idItem: string) => void
+}) {
   const [menus, setMenus] = useState<MenuDTO[]>([])
   const [itensMenu, setItensMenu] = useState<ItemMenuDTO[]>([])
 
@@ -40,6 +46,11 @@ function Cardapio(
     )
   }, [itensMenu, filtroItem])
 
+  function handleCheckboxChange(item: ItemMenuDTO) {
+    const itemSelecionado = itensSelecionados.find((i) => i.id === item.id)
+    itemSelecionado ? onRemoveItem(item.id) : onSelectItem(item)
+  }
+
   return (
     <>
       <input
@@ -57,7 +68,8 @@ function Cardapio(
             className="grid grid-cols-[auto_1fr_auto] items-center gap-4 w-full py-4 px-6 bg-white hover:bg-gray-100">
             <input
               type="checkbox"
-              onChange={() => onSelectItem(item)}
+              checked={itensSelecionados.some((i) => i.id === item.id)}
+              onChange={() => handleCheckboxChange(item)}
               className="size-5"
             />
 
@@ -229,7 +241,11 @@ function PedidoForm() {
         </button>
       </form>
 
-      <Cardapio onSelectItem={adicionarItem} />
+      <Cardapio
+        onSelectItem={adicionarItem}
+        itensSelecionados={itensSelecionados}
+        onRemoveItem={removerItem}
+      />
     </>
   )
 }
