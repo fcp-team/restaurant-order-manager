@@ -4,8 +4,8 @@ import { WebSocketServer, WebSocket } from 'ws'
 import { IncomingMessage } from 'http'
 
 const dev = process.env.NODE_ENV !== 'production'
-const hostname = 'localhost'
-const port = Number(process.env.PORT)
+const hostname = process.env.HOST || 'localhost'
+const port = Number(process.env.PORT) || 3000
 
 const app = next({ dev, hostname, port })
 const handle = app.getRequestHandler()
