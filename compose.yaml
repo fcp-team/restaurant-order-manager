@@ -34,6 +34,7 @@ services:
       DB_NAME: gestao_restaurante
       JWT_SECRET: 4bb7c591820bc6654219df61d4fe28adc2bc4457a5a757081af0829a5d9b5b887d96d16f39582b569878a8d0979caa1a942ce911260de0f8769a797fb458c0fb
       JWT_EXPIRES_IN: 7d
+      NEXT_PUBLIC_WS_SERVER: ws://localhost:5500/ws
     ports:
       - "5500:3000"
     depends_on:
