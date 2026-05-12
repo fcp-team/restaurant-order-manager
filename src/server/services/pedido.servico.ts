@@ -27,7 +27,7 @@ export default class ServicoPedido {
     const pedidoItens: ItemPedido[] = []
 
     for (const i of itens) {
-      const itemMenu = await this.repositorioMenu.buscarItem(i.idMenu, i.idItemMenu)
+      const itemMenu = await this.repositorioMenu.buscarItem(i.idItemMenu)
       if (!itemMenu) throw new Error(`Item de menu não encontrado: ${i.idItemMenu}`)
 
       pedidoItens.push(new ItemPedido(
@@ -54,7 +54,7 @@ export default class ServicoPedido {
   async adicionarItem(idPedido: string, itemPayload: NovoItemPedidoPayload): Promise<Pedido> {
     if (itemPayload.quantidade <= 0) throw new Error("Quantidade inválida")
 
-    const itemMenu = await this.repositorioMenu.buscarItem(itemPayload.idMenu, itemPayload.idItemMenu)
+    const itemMenu = await this.repositorioMenu.buscarItem(itemPayload.idItemMenu)
     if (!itemMenu) throw new Error(`Item de menu não encontrado: ${itemPayload.idItemMenu}`)
 
     const novoItem = new ItemPedido(
@@ -113,7 +113,6 @@ export default class ServicoPedido {
   }
 
   async fecharPedido(id: string) {
-    // if (!this.autorizacao.autorizar()) throw new Error("Não autorizado")
     const pedido = await this.buscarPedido(id)
     pedido.fechar()
 
@@ -121,7 +120,6 @@ export default class ServicoPedido {
   }
 
   async cancelarPedido(id: string) {
-    // if (!this.autorizacao.autorizar()) throw new Error("Não autorizado")
     const pedido = await this.buscarPedido(id)
     pedido.cancelar()
 

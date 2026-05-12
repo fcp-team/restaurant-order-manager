@@ -22,7 +22,7 @@ export type PedidoDTO = {
 
 export type NovoItemPedidoPayload = {
   idItemMenu: string
-  idMenu: string
+  // idMenu: string
   quantidade: number
   observacao?: string
 }
