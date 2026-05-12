@@ -11,7 +11,7 @@ export type MenuPayload = {
 
 export type ItemMenuDTO = {
   id: string
-  idMenu: string
+  // idMenu: string
   nome: string
   descricao: string
   preco: number

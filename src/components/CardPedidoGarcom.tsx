@@ -1,39 +1,95 @@
-import { useState } from "react"
+import { PedidoDTO } from "@/lib/dtos/pedido"
+import { StatusPedido } from "@/lib/enums/status-pedido"
 
 type CardGarcomProps = {
-    pedido: Record<string, any>
+  pedido: PedidoDTO
+  atualizarPedidoFn: () => void
 }
 
-export default function CardPedidoGarcom({pedido}: CardGarcomProps){
-    
-    const [estado, setEstado] = useState(pedido.estado)
+export default function CardPedidoGarcom({
+  pedido,
+  atualizarPedidoFn
+}: CardGarcomProps) {
 
-    function mudarEstado() {
-        const novoEstado = "Entregue"
-        
-        setEstado(novoEstado)
-        
-        fetch("/api/pedido/atualizar-status", {
-            method: 'PATCH',
-            headers: {"Content-Type": 'application/json'},
-            body: JSON.stringify({ idPedido: pedido.id, novoStatus: novoEstado })
-        })
+  async function alterarStatus(status: StatusPedido) {
+    if (!Object.values(StatusPedido).includes(status)) {
+      alert("Status inválido")
+      return
     }
 
-    return (
-        <div className="w-full max-w-md bg-[var(--color-surface)] border-[var(--color-surface-border)] border-2 flex flex-col rounded-2xl p-4 m-4">
-            <h3 className="text-2xl font-bold">Pedido n°{pedido.numeroPedido} - Mesa {pedido.numeroMesa}</h3>
-            <p className="pt-2">{pedido.data}</p>
-            <p className="pt-1">Estado: {estado}</p>
-            <ul className="text-lg list-disc list-inside m-3">
-                {pedido.itens?.map((item: any, index: number) => (
-                    <li key={index}>{item.nome ?? item}</li>
-                ))}
-            </ul>
-            <button onClick={mudarEstado} className="cursor-pointer bg-[var(--color-button-action)] transition duration-300 hover:bg-
-             [var(--color-button-action-hover)] border-[var(--color-button-action-border)] border-2 rounded-2xl p-2 px-5 m-3">
-                Finalizar Pedido
-            </button>
-        </div>
-    )
+    try {
+      const res = await fetch("/api/pedido/atualizar-status", {
+        method: 'PATCH',
+        headers: { "Content-Type": 'application/json' },
+        body: JSON.stringify({
+          idPedido: pedido.id,
+          status: status
+        })
+      })
+
+      if (!res.ok) {
+        alert("Erro ao alterar status do pedido: " + res.statusText)
+        return
+      }
+    } catch (error) {
+      alert("Erro ao alterar status do pedido: " + (error as Error).message)
+    }
+  }
+
+  return (
+    <div className="w-full max-w-md bg-(--color-surface) border-(--color-surface-border) border-2 flex flex-col gap-4 rounded-2xl p-4">
+      <h3 className="text-2xl font-bold">Pedido n°{pedido.id} - Mesa {pedido.numeroMesa}</h3>
+
+      <p>
+        Data de criação: {Intl.DateTimeFormat("pt-BR", {
+          dateStyle: "short"
+        }).format(new Date(pedido.criadoEm || Date.now()))}
+      </p>
+      <p>Status: {pedido.status}</p>
+
+      <ul className="flex flex-col gap-1 text-lg list-disc list-inside rounded-lg bg-white">
+        {pedido.itens.map((item, index) => (
+          <li
+            key={index}
+            className="px-4 py-2"
+          >
+            <span>{item.nome}</span>
+            <span className="float-right">
+              &times;{item.quantidade} | {item.status}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <p>
+        Total: {Intl.NumberFormat("pt-br", {
+          style: "currency",
+          currency: "BRL"
+        }).format(pedido.itens.reduce((acc, item) => (
+          acc + item.precoUnitario * item.quantidade
+        ), 0))}
+      </p>
+
+      <button
+        onClick={atualizarPedidoFn}
+        className="cursor-pointer bg-(--color-button-action) transition duration-300 hover:bg-(--color-button-action-hover) border-(--color-button-action-border) border-2 rounded-2xl p-2 px-5 text-center"
+      >
+        Editar
+      </button>
+
+      <button
+        onClick={() => alterarStatus(StatusPedido.CANCELADO)}
+        className="cursor-pointer bg-(--color-button-action) transition duration-300 hover:bg-(--color-button-action-hover) border-(--color-button-action-border) border-2 rounded-2xl p-2 px-5"
+      >
+        Cancelar pedido
+      </button>
+
+      <button
+        onClick={() => alterarStatus(StatusPedido.FECHADO)}
+        className="cursor-pointer bg-(--color-button-action) transition duration-300 hover:bg-(--color-button-action-hover) border-(--color-button-action-border) border-2 rounded-2xl p-2 px-5"
+      >
+        Finalizar pedido
+      </button>
+    </div>
+  )
 }
