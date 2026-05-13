@@ -2,7 +2,7 @@
 
 import { useState, useEffect, SubmitEvent } from "react"
 import { ItemMenuDTO, MenuDTO } from "@/lib/dtos/menu"
-import { NovoItemPedidoPayload, NovoPedidoPayload } from "@/lib/dtos/pedido"
+import { NovoItemPedidoDTO, NovoPedidoDTO } from "@/lib/dtos/pedido"
 
 type CardapioProps = {
   onSelectItem: (item: ItemMenuDTO) => void,
@@ -89,10 +89,10 @@ function Cardapio({
 
 export default function PedidoForm() {
   const [itensSelecionados, setItensSelecionados] = useState<ItemMenuDTO[]>([])
-  const [itensPedido, setItensPedido] = useState<NovoItemPedidoPayload[]>([])
+  const [itensPedido, setItensPedido] = useState<NovoItemPedidoDTO[]>([])
 
   useEffect(() => {
-    const itens: NovoItemPedidoPayload[] = itensSelecionados.map((item) => ({
+    const itens: NovoItemPedidoDTO[] = itensSelecionados.map((item) => ({
       idItemMenu: item.id,
       quantidade: 1
     }))
@@ -144,7 +144,7 @@ export default function PedidoForm() {
       return
     }
 
-    const pedido: NovoPedidoPayload = {
+    const pedido: NovoPedidoDTO = {
       numeroMesa: numeroMesa,
       itens: itensPedido
     }
@@ -166,7 +166,7 @@ export default function PedidoForm() {
     } catch (reason) {
       console.error(reason)
       alert("Houve um problema ao registrar o pedido: " + (reason as Error).message)
-    
+
     }
   }
 

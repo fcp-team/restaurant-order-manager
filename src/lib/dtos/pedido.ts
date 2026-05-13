@@ -20,14 +20,30 @@ export type PedidoDTO = {
   fechadoEm?: Date
 }
 
-export type NovoItemPedidoPayload = {
+export type NovoItemPedidoDTO = {
   idItemMenu: string
-  // idMenu: string
   quantidade: number
   observacao?: string
 }
 
-export type NovoPedidoPayload = {
+export type NovoPedidoDTO = {
   numeroMesa: string
-  itens: NovoItemPedidoPayload[]
+  itens: NovoItemPedidoDTO[]
+}
+
+export type ItemPedidoAtualizadoDTO = {
+  id: string
+  // idPedido?: string
+  quantidade?: number
+  observacao?: string
+  status?: StatusItemPedido
+}
+
+export type PedidoAtualizadoDTO = {
+  id: string
+  numeroMesa?: string
+  status?: StatusPedido
+  itensAdicionados?: NovoItemPedidoDTO[]
+  itensRemovidos?: string[]
+  itensAlterados?: ItemPedidoAtualizadoDTO[]
 }

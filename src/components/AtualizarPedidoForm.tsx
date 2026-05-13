@@ -2,9 +2,10 @@
 
 import { useState, useEffect, SubmitEvent } from "react"
 import { ItemMenuDTO, MenuDTO } from "@/lib/dtos/menu"
-import { NovoItemPedidoPayload, NovoPedidoPayload, PedidoDTO } from "@/lib/dtos/pedido"
+import { PedidoAtualizadoDTO, PedidoDTO } from "@/lib/dtos/pedido"
 
 type ItemPedidoForm = {
+  id?: string
   idItemMenu: string
   nome: string
   precoUnitario: number
@@ -106,6 +107,7 @@ export default function AtualizarPedidoForm({ pedido }: AtualizarPedidoFormProps
   const [numeroMesa, setNumeroMesa] = useState<string>(pedido.numeroMesa)
   const [itensPedido, setItensPedido] = useState<ItemPedidoForm[]>(
     pedido.itens.map((item) => ({
+      id: item.id,
       idItemMenu: item.idItemMenu,
       nome: item.nome,
       precoUnitario: item.precoUnitario,
@@ -163,40 +165,43 @@ export default function AtualizarPedidoForm({ pedido }: AtualizarPedidoFormProps
       return
     }
 
-    const payload: NovoPedidoPayload = {
-      numeroMesa: numeroMesa,
-      itens: itensPedido.map(item => ({
-        idItemMenu: item.idItemMenu,
-        quantidade: item.quantidade,
-        observacao: item.observacao
-      }))
-    }
-
     try {
-      // const res = await fetch("/api/pedido/criar", {
-      //   method: "POST",
+      const pedidoAtualizado: PedidoAtualizadoDTO = {
+        id: pedido.id
+      }
+
+      const novosItens = itensPedido.filter((item) => (
+        !(pedido.itens.find((i) => i.idItemMenu === item.idItemMenu))
+      ))
+      if (novosItens.length > 0) pedidoAtualizado.itensAdicionados = novosItens
+
+      const itensRemovidos = pedido.itens.filter((item) => (
+        !itensPedido.find((i) => i.idItemMenu === item.idItemMenu)
+      )).map((item) => item.id)
+      if (itensRemovidos.length > 0) pedidoAtualizado.itensRemovidos = itensRemovidos
+
+      if (pedido.numeroMesa !== numeroMesa) pedidoAtualizado.numeroMesa = numeroMesa
+
+      const itensAlterados = itensPedido.filter((item) => (
+        !(item.id && itensRemovidos.includes(item.id)) &&
+        !(novosItens.some((i) => i.idItemMenu === item.idItemMenu))
+      ))
+      console.log(itensAlterados)
+
+      // const res = await fetch("/api/pedido/atualizar", {
+      //   method: "PATCH",
       //   headers: { "content-type": "application/json" },
-      //   body: JSON.stringify(payload)
+      //   body: JSON.stringify(pedidoAtualizado)
       // })
 
       // if (!res.ok) {
-      //   alert("Houve um problema ao registrar o pedido: " + res.statusText)
-      //   return
+      //   throw new Error(`Erro ao atualizar pedido: ${res.statusText}`)
       // }
 
-      alert("Pedido atualizado com sucesso!")
-      setItensPedido(
-        pedido.itens.map((item) => ({
-          idItemMenu: item.idItemMenu,
-          nome: item.nome,
-          precoUnitario: item.precoUnitario,
-          quantidade: item.quantidade,
-          observacao: item.observacao
-        }))
-      )
+      // alert("Pedido atualizado com sucesso!")
     } catch (reason) {
       console.error(reason)
-      alert("Houve um problema ao registrar o pedido: " + (reason as Error).message)
+      alert("Houve um problema ao atualizar o pedido: " + (reason as Error).message)
     }
   }
 

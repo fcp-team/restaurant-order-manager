@@ -7,6 +7,8 @@ import { StatusPedido } from "@/lib/enums/status-pedido"
 
 export interface IRepositorioPedido {
   criarPedido(pedido: Pedido): Promise<void>
+  atualizarPedido(pedido: Pedido): Promise<void>
+  removerItens(pedido: Pedido): Promise<void>
   buscarPedido(id: string): Promise<Pedido | null>
   adicionarItem(idPedido: string, item: ItemPedido): Promise<Pedido>
   acrescentarItem(idPedido: string, idItem: string, quantidade: number): Promise<Pedido>
@@ -51,6 +53,77 @@ export class RepositorioPedido implements IRepositorioPedido {
     }
   }
 
+  async atualizarPedido(pedido: Pedido): Promise<void> {
+    const conn = await pool.getConnection()
+    try {
+      await conn.beginTransaction()
+
+      await conn.execute(
+        `UPDATE Pedidos
+          SET mesa = ?,
+          status = ?,
+          fechamento = ?,
+          total = ?
+        WHERE id_pedido = ? AND excluido = 0`,
+        [pedido.numeroMesa, pedido.Status, pedido.FechadoEm ?? null, pedido.calcularTotal(), pedido.Id]
+      )
+
+      for (const item of pedido.Itens) {
+        if (!item.Id) {
+          console.log("ID do item: ", item.Id)
+          const [res] = await conn.execute<ResultSetHeader>(
+            `INSERT INTO ItensPedidos (id_pedido, id_item, quantidade, nota, status) VALUES (?, ?, ?, ?, ?)`,
+            [pedido.Id, item.IdItemMenu, item.Quantidade, item.observacao ?? null, item.Status]
+          )
+
+          const idItemPedido = res.insertId
+          item.Id = String(idItemPedido)
+          continue
+        }
+
+        await conn.execute(
+          `UPDATE ItensPedidos
+              SET quantidade = ?,
+              nota = ?,
+              status = ?
+            WHERE id_itempedido = ? AND id_pedido = ? AND excluido = 0`,
+          [item.Quantidade, item.observacao ?? null, item.Status, item.Id, pedido.Id]
+        )
+      }
+
+      await conn.commit()
+    } catch (err) {
+      await conn.rollback()
+      throw err
+    } finally {
+      conn.release()
+    }
+  }
+
+  async removerItens(pedido: Pedido): Promise<void> {
+    const conn = await pool.getConnection()
+    try {
+      await conn.beginTransaction()
+
+      const idItens = pedido.Itens.map((item) => item.Id)
+      const placeholders = idItens.map(() => "?").join(", ")
+      console.log("IDs: ", ...idItens)
+
+      await conn.execute(
+        `UPDATE ItensPedidos SET excluido = 1
+            WHERE id_pedido = ? AND id_itempedido NOT IN (${placeholders})`,
+        [pedido.Id, ...idItens]
+      )
+
+      await conn.commit()
+    } catch (err) {
+      await conn.rollback()
+      throw err
+    } finally {
+      conn.release()
+    }
+  }
+
   async buscarPedido(id: string): Promise<Pedido | null> {
     const [rowsPedidos] = await pool.execute<RowDataPacket[]>(
       `SELECT * FROM Pedidos WHERE id_pedido = ? AND excluido = 0`,
@@ -60,10 +133,17 @@ export class RepositorioPedido implements IRepositorioPedido {
     if (!pedidoRow) return null
 
     const [rowsItens] = await pool.execute<RowDataPacket[]>(
-      `SELECT ip.id_itempedido, ip.id_item, ip.quantidade, ip.nota, ip.status, it.nome, it.valor
-       FROM ItensPedidos ip
-       JOIN Itens it ON ip.id_item = it.id_item
-       WHERE ip.id_pedido = ? AND ip.excluido = 0`,
+      `SELECT
+        ip.id_itempedido,
+        ip.id_item,
+        ip.quantidade,
+        ip.nota,
+        ip.status,
+        it.nome,
+        it.valor
+      FROM ItensPedidos ip
+        JOIN Itens it ON ip.id_item = it.id_item
+        WHERE ip.id_pedido = ? AND ip.excluido = 0`,
       [Number(id)]
     )
 
@@ -94,10 +174,6 @@ export class RepositorioPedido implements IRepositorioPedido {
     const conn = await pool.getConnection()
     try {
       await conn.beginTransaction()
-
-      // const [menuRows] = await conn.execute<RowDataPacket[]>(`SELECT nome, valor FROM Itens WHERE id_item = ? AND excluido = 0`, [Number(idItemMenu)])
-      // const menu = menuRows[0]
-      // if (!menu) throw new Error("Item de menu não encontrado")
 
       await conn.execute<ResultSetHeader>(
         `INSERT INTO ItensPedidos (id_pedido, id_item, quantidade, nota, status) VALUES (?, ?, ?, ?, ?)`,

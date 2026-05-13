@@ -12,7 +12,7 @@ export class ItemPedido {
     public observacao?: string,
   ) { }
 
-  get Id() { return String(this.id) }
+  get Id(): string | null { return this.id }
 
   set Id(valor: string) {
     if (this.id) throw new Error("Não é possível atribuir um novo id ao item do pedido")

@@ -20,7 +20,7 @@ const rotasPorFuncao: Record<Funcao, string[]> = {
   [Funcao.COZINHA]: [
     "/cozinha",
     "/api/pedido/item/atualizar-status",
-    // "/api/usuarios/[id]/atualizar",
+    "/api/usuarios/[id]/atualizar",
   ]
 }
 

@@ -3,9 +3,11 @@ import { IRepositorioMenu, RepositorioMenu } from "../repositories/menu.reposito
 
 import { Pedido } from "../classes/pedido"
 import { ItemPedido } from "../classes/item-pedido"
-import { NovoPedidoPayload, NovoItemPedidoPayload } from "@/lib/dtos/pedido"
+
+import { NovoPedidoDTO, NovoItemPedidoDTO } from "@/lib/dtos/pedido"
 import { StatusPedido } from "@/lib/enums/status-pedido"
 import { StatusItemPedido } from "@/lib/enums/status-item-pedido"
+import { ItemMenu } from "../classes/item-menu"
 
 export default class ServicoPedido {
   constructor(
@@ -13,7 +15,7 @@ export default class ServicoPedido {
     private repositorioMenu: IRepositorioMenu = new RepositorioMenu(),
   ) { }
 
-  async criarPedido(payload: NovoPedidoPayload): Promise<Pedido> {
+  async criarPedido(payload: NovoPedidoDTO): Promise<Pedido> {
     const { numeroMesa, itens } = payload
 
     if (!numeroMesa) {
@@ -51,23 +53,44 @@ export default class ServicoPedido {
     return pedido
   }
 
-  async adicionarItem(idPedido: string, itemPayload: NovoItemPedidoPayload): Promise<Pedido> {
-    if (itemPayload.quantidade <= 0) throw new Error("Quantidade inválida")
+  async adicionarItens(idPedido: string, itens: NovoItemPedidoDTO[]): Promise<Pedido> {
+    if (itens.length === 0)
+      throw new Error("Não foram passados os itens a serem adicionados ao pedido")
+    
+    const pedido = await this.repositorio.buscarPedido(idPedido)
+    if (!pedido) throw new Error(`Pedido não encontrado - ID: ${idPedido}`)
+    
+    for (const item of itens) {
+      if (!item.idItemMenu) throw new Error("Item do cardápio não informado.")
+      if (item.quantidade <= 0) throw new Error("Item com quantidade inválida")
 
-    const itemMenu = await this.repositorioMenu.buscarItem(itemPayload.idItemMenu)
-    if (!itemMenu) throw new Error(`Item de menu não encontrado: ${itemPayload.idItemMenu}`)
+      const itemMenu = await this.repositorioMenu.buscarItem(item.idItemMenu)
+      if (!itemMenu) throw new Error(`Item do cardápio não encontrado - ID: ${item.idItemMenu}`)
 
-    const novoItem = new ItemPedido(
-      itemMenu.Id,
-      itemMenu.Nome,
-      itemPayload.quantidade,
-      itemMenu.Preco,
-      itemPayload.observacao
-    )
+      const novoItem = new ItemPedido(
+        itemMenu.Id,
+        itemMenu.Nome,
+        item.quantidade,
+        itemMenu.Preco,
+        item.observacao
+      )
 
-    const pedido = await this.repositorio.adicionarItem(idPedido, novoItem)
-    if (!pedido) throw new Error('Falha ao adicionar item')
+      pedido.adicionarItem(novoItem)
+    }
+    await this.repositorio.atualizarPedido(pedido)
+    return pedido
+  }
 
+  async removerItens(idPedido: string, idItens: string[]): Promise<Pedido> {
+    if (idItens.length === 0)
+      throw new Error("Não foram indicados os itens a serem removidos do pedido")
+
+    const pedido = await this.repositorio.buscarPedido(idPedido)
+    if (!pedido) throw new Error(`Pedido não encontrado - ID: ${idPedido}`)
+
+    idItens.forEach((id) => pedido.removerItem(id))
+
+    await this.repositorio.removerItens(pedido)
     return pedido
   }
 
@@ -75,13 +98,6 @@ export default class ServicoPedido {
     if (quantidade <= 0) throw new Error("Quantidade inválida")
     const pedido = await this.repositorio.acrescentarItem(idPedido, idItem, quantidade)
     if (!pedido) throw new Error('Falha ao adicionar item')
-
-    return pedido
-  }
-
-  async removerItem(idPedido: string, idItem: string): Promise<Pedido> {
-    const pedido = await this.repositorio.removerItem(idPedido, idItem)
-    if (!pedido) throw new Error('Falha ao remover item')
 
     return pedido
   }
