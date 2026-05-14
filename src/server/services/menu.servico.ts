@@ -1,17 +1,7 @@
 import { IRepositorioMenu } from "../repositories/menu.repositorio"
 import { ItemMenu } from "../classes/item-menu"
 import { Menu } from "../classes/menu"
- 
-export type ItemMenuPayload = {
-  nome: string
-  preco: number
-  descricao?: string
-}
- 
-export type MenuPayload = {
-  nome: string
-  itens: ItemMenuPayload[]
-}
+import { ItemMenuPayload, MenuPayload } from "@/lib/dtos/menu"
  
 export default class ServicoMenu {
   constructor(
@@ -50,8 +40,8 @@ export default class ServicoMenu {
     return await this.repositorio.atualizarMenu(menuAtualizado)
   }
  
-  async buscarItem(idMenu: string, idItem: string): Promise<ItemMenu> {
-    const item = await this.repositorio.buscarItem(idMenu, idItem)
+  async buscarItem(idItem: string): Promise<ItemMenu> {
+    const item = await this.repositorio.buscarItem(idItem)
     if (!item) throw new Error("Item não encontrado")
     return item
   }
@@ -67,7 +57,7 @@ export default class ServicoMenu {
   }
  
   async removerItem(idMenu: string, idItem: string): Promise<Menu> {
-    await this.buscarItem(idMenu, idItem) // valida se o item existe
+    await this.buscarItem(idItem) // valida se o item existe
     return await this.repositorio.removerItem(idMenu, idItem)
   }
  
@@ -98,7 +88,7 @@ export default class ServicoMenu {
       }
     }
  
-    const item = await this.buscarItem(idMenu, idItem)
+    const item = await this.buscarItem(idItem)
  
     if (payload.nome !== undefined) item.alterarNome(payload.nome.trim())
     if (payload.preco !== undefined) item.alterarPreco(payload.preco)

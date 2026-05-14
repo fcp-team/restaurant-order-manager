@@ -30,7 +30,9 @@ export class Pedido {
     this.status = valor
   }
 
-  get FechadoEm() { return new Date(this.fechadoEm || "") }
+  get FechadoEm(): Date | undefined {
+    if (this.fechadoEm) return new Date(this.fechadoEm)
+  }
 
   set FechadoEm(data: Date) {
     if (this.status === StatusPedido.ABERTO) {
@@ -49,23 +51,17 @@ export class Pedido {
     this.itens = this.itens.filter(i => i.Id !== idItem)
   }
 
-  acrescentarItem(idItem: string) {
+  atualizarItem(
+    idItem: string,
+    dados: {
+      quantidade?: number
+      observacao?: string
+      status?: StatusItemPedido
+    }
+  ) {
     this.assegurarPedidoAberto()
-
     const item = this.pegarItem(idItem)
-    item.acrescentar()
-  }
-
-  reduzirItem(itemId: string) {
-    this.assegurarPedidoAberto()
-
-    const item = this.pegarItem(itemId)
-    item.reduzir()
-  }
-
-  alterarItemStatus(itemId: string, status: StatusItemPedido) {
-    const item = this.pegarItem(itemId)
-    item.alterarStatus(status)
+    item.atualizar(dados)
   }
 
   listarItensPorStatus(status: StatusItemPedido) {
@@ -78,14 +74,34 @@ export class Pedido {
       .reduce((ac, valor) => ac + valor, 0)
   }
 
-  fechar() {
+  alterarStatus(status: StatusPedido) {
+    if (!Object.values(StatusPedido).includes(status))
+      throw new Error("Status inválido para o pedido")
+
+    switch (status) {
+      case StatusPedido.FECHADO:
+        this.fechar()
+        break
+
+      case StatusPedido.CANCELADO:
+        this.cancelar()
+        break
+
+      case StatusPedido.ABERTO:
+        this.status = status
+        this.fechadoEm = undefined
+        break
+    }
+  }
+
+  private fechar() {
     this.assegurarPedidoAberto()
 
     this.status = StatusPedido.FECHADO
     this.fechadoEm = new Date()
   }
 
-  cancelar() {
+  private cancelar() {
     if (this.status === StatusPedido.FECHADO) {
       throw new Error("Pedidos fechados não podem ser cancelados")
     }

@@ -8,7 +8,7 @@ export interface IRepositorioMenu {
   buscarMenu(id: string): Promise<Menu | null>
   listarMenus(): Promise<Menu[]>
   atualizarMenu(menu: Menu): Promise<Menu>
-  buscarItem(idMenu: string, idItem: string): Promise<ItemMenu | null>
+  buscarItem(idItem: string): Promise<ItemMenu | null>
   adicionarItem(idMenu: string, item: ItemMenu): Promise<Menu>
   removerItem(idMenu: string, idItem: string): Promise<Menu>
   atualizarItem(idMenu: string, item: ItemMenu): Promise<ItemMenu | null>
@@ -94,10 +94,10 @@ export class RepositorioMenu implements IRepositorioMenu {
     return atualizado
   }
  
-  async buscarItem(idMenu: string, idItem: string): Promise<ItemMenu | null> {
+  async buscarItem(idItem: string): Promise<ItemMenu | null> {
     const [rows] = await pool.execute<RowDataPacket[]>(
-      `SELECT * FROM Itens WHERE id_item = ? AND id_menu = ? AND excluido = 0`,
-      [Number(idItem), Number(idMenu)]
+      `SELECT * FROM Itens WHERE id_item = ? AND excluido = 0`,
+      [Number(idItem)]
     )
  
     const row = rows[0]
@@ -167,6 +167,6 @@ export class RepositorioMenu implements IRepositorioMenu {
       [item.Nome, item.Descricao, item.Preco, Number(item.Id), Number(idMenu)]
     )
  
-    return await this.buscarItem(idMenu, item.Id)
+    return await this.buscarItem(item.Id)
   }
 }

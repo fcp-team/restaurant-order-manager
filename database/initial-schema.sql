@@ -94,7 +94,7 @@ CREATE TABLE Pedidos (
     fechamento DATETIME,
     pagamento DECIMAL(10,2),
     total DECIMAL(10,2) NOT NULL,
-    status ENUM('aberto','fechado','cancelado') NOT NULL DEFAULT 'aberto',
+    status ENUM('ABERTO','FECHADO','CANCELADO') NOT NULL DEFAULT 'ABERTO',
     excluido TINYINT(1) NOT NULL DEFAULT 0,
     CHECK (excluido IN (0,1)),
 
@@ -114,7 +114,7 @@ CREATE TABLE ItensPedidos (
     id_item INT NOT NULL,
     quantidade INT NOT NULL,
     nota VARCHAR(255),
-    status ENUM('preparando','pronto','entregue') NOT NULL DEFAULT 'preparando',
+    status ENUM('PENDENTE','PREPARANDO','PRONTO') NOT NULL DEFAULT 'PREPARANDO',
     excluido TINYINT(1) NOT NULL DEFAULT 0,
     CHECK (excluido IN (0,1)),
 

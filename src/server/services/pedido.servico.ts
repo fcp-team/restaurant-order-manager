@@ -3,9 +3,11 @@ import { IRepositorioMenu, RepositorioMenu } from "../repositories/menu.reposito
 
 import { Pedido } from "../classes/pedido"
 import { ItemPedido } from "../classes/item-pedido"
-import { NovoPedidoPayload, NovoItemPedidoPayload } from "@/lib/dtos/pedido"
+
+import { NovoPedidoDTO, NovoItemPedidoDTO, PedidoAtualizadoDTO, ItemPedidoAtualizadoDTO } from "@/lib/dtos/pedido"
 import { StatusPedido } from "@/lib/enums/status-pedido"
 import { StatusItemPedido } from "@/lib/enums/status-item-pedido"
+import { ItemMenu } from "../classes/item-menu"
 
 export default class ServicoPedido {
   constructor(
@@ -13,7 +15,7 @@ export default class ServicoPedido {
     private repositorioMenu: IRepositorioMenu = new RepositorioMenu(),
   ) { }
 
-  async criarPedido(payload: NovoPedidoPayload): Promise<Pedido> {
+  async criarPedido(payload: NovoPedidoDTO): Promise<Pedido> {
     const { numeroMesa, itens } = payload
 
     if (!numeroMesa) {
@@ -27,7 +29,7 @@ export default class ServicoPedido {
     const pedidoItens: ItemPedido[] = []
 
     for (const i of itens) {
-      const itemMenu = await this.repositorioMenu.buscarItem(i.idMenu, i.idItemMenu)
+      const itemMenu = await this.repositorioMenu.buscarItem(i.idItemMenu)
       if (!itemMenu) throw new Error(`Item de menu não encontrado: ${i.idItemMenu}`)
 
       pedidoItens.push(new ItemPedido(
@@ -51,47 +53,84 @@ export default class ServicoPedido {
     return pedido
   }
 
-  async adicionarItem(idPedido: string, itemPayload: NovoItemPedidoPayload): Promise<Pedido> {
-    if (itemPayload.quantidade <= 0) throw new Error("Quantidade inválida")
+  async atualizarPedido(payload: PedidoAtualizadoDTO): Promise<Pedido> {
+    if (!payload.id) throw new Error("ID do pedido não informado")
 
-    const itemMenu = await this.repositorioMenu.buscarItem(itemPayload.idMenu, itemPayload.idItemMenu)
-    if (!itemMenu) throw new Error(`Item de menu não encontrado: ${itemPayload.idItemMenu}`)
+    const idPedido = payload.id
+    const pedido = await this.repositorio.buscarPedido(idPedido)
+    if (!pedido) throw new Error(`Pedido não encontrado - ID: ${idPedido}`)
 
-    const novoItem = new ItemPedido(
-      itemMenu.Id,
-      itemMenu.Nome,
-      itemPayload.quantidade,
-      itemMenu.Preco,
-      itemPayload.observacao
-    )
+    if (payload.numeroMesa !== undefined)
+      pedido.numeroMesa = payload.numeroMesa
+    
+    if (payload.status !== undefined)
+      pedido.alterarStatus(payload.status)
+    
+    if (payload.itensAdicionados !== undefined)
+      await this.adicionarItens(pedido, payload.itensAdicionados)
+    
+    if (payload.itensRemovidos !== undefined)
+      await this.removerItens(pedido, payload.itensRemovidos)
+    
+    if (payload.itensAlterados !== undefined)
+      await this.atualizarItens(pedido, payload.itensAlterados)
 
-    const pedido = await this.repositorio.adicionarItem(idPedido, novoItem)
-    if (!pedido) throw new Error('Falha ao adicionar item')
-
+    await this.repositorio.atualizarPedido(pedido)
     return pedido
   }
 
-  async acrescentarItem(idPedido: string, idItem: string, quantidade: number): Promise<Pedido> {
-    if (quantidade <= 0) throw new Error("Quantidade inválida")
-    const pedido = await this.repositorio.acrescentarItem(idPedido, idItem, quantidade)
-    if (!pedido) throw new Error('Falha ao adicionar item')
+  private async adicionarItens(pedido: Pedido, itens: NovoItemPedidoDTO[]): Promise<void> {
+    if (itens.length === 0)
+      throw new Error("Não foram passados os itens a serem adicionados ao pedido")
 
-    return pedido
+    for (const item of itens) {
+      if (!item.idItemMenu) throw new Error("Item do cardápio não informado.")
+      if (item.quantidade <= 0) throw new Error("Item com quantidade inválida")
+
+      const itemMenu = await this.repositorioMenu.buscarItem(item.idItemMenu)
+      if (!itemMenu) throw new Error(`Item do cardápio não encontrado - ID: ${item.idItemMenu}`)
+
+      const novoItem = new ItemPedido(
+        itemMenu.Id,
+        itemMenu.Nome,
+        item.quantidade,
+        itemMenu.Preco,
+        item.observacao
+      )
+
+      pedido.adicionarItem(novoItem)
+    }
   }
 
-  async removerItem(idPedido: string, idItem: string): Promise<Pedido> {
-    const pedido = await this.repositorio.removerItem(idPedido, idItem)
-    if (!pedido) throw new Error('Falha ao remover item')
+  private async removerItens(pedido: Pedido, idItens: string[]): Promise<void> {
+    if (idItens.length === 0)
+      throw new Error("Não foram indicados os itens a serem removidos do pedido")
 
-    return pedido
+    idItens.forEach((id) => pedido.removerItem(id))
   }
 
-  async reduzirItem(idPedido: string, idItem: string, quantidade: number): Promise<Pedido> {
-    if (quantidade <= 0) throw new Error("Quantidade inválida")
-    const pedido = await this.repositorio.reduzirItem(idPedido, idItem, quantidade)
-    if (!pedido) throw new Error('Falha ao adicionar item')
+  private async atualizarItens(pedido: Pedido, itens: ItemPedidoAtualizadoDTO[]): Promise<void> {
+    if (itens.length === 0)
+      throw new Error("Não foram passados os itens a serem atualizados")
 
-    return pedido
+    if (pedido.Itens.length === 0)
+      throw new Error("Não há itens a serem atualizados no pedido")
+
+    for (const item of itens) {
+      if (!item.id) throw new Error("ID do item não informado")
+      
+      if (item.quantidade && item.quantidade <= 0)
+        throw new Error("Item com quantidade inválida")
+
+      if (item.status && !Object.values(StatusItemPedido).includes(item.status))
+        throw new Error("Status inválido para o item")
+
+      pedido.atualizarItem(item.id, {
+        quantidade: item.quantidade,
+        observacao: item.observacao,
+        status: item.status
+      })
+    }
   }
 
   async listarPorStatus(status: StatusPedido): Promise<Pedido[]> {
@@ -102,29 +141,5 @@ export default class ServicoPedido {
   async listarPorPeriodo(inicio: Date, fim: Date): Promise<Pedido[]> {
     const pedidos = await this.repositorio.listarPorPeriodo(inicio, fim)
     return pedidos
-  }
-
-  async alterarStatusPedido(id: string, status: StatusPedido): Promise<Pedido> {
-    return await this.repositorio.atualizarStatusPedido(id, status)
-  }
-
-  async alterarStatusItem(idPedido: string, idItem: string, status: StatusItemPedido): Promise<Pedido> {
-    return await this.repositorio.atualizarStatusItem(idPedido, idItem, status)
-  }
-
-  async fecharPedido(id: string) {
-    // if (!this.autorizacao.autorizar()) throw new Error("Não autorizado")
-    const pedido = await this.buscarPedido(id)
-    pedido.fechar()
-
-    await this.repositorio.atualizarStatusPedido(id, StatusPedido.FECHADO)
-  }
-
-  async cancelarPedido(id: string) {
-    // if (!this.autorizacao.autorizar()) throw new Error("Não autorizado")
-    const pedido = await this.buscarPedido(id)
-    pedido.cancelar()
-
-    await this.repositorio.atualizarStatusPedido(id, StatusPedido.CANCELADO)
   }
 }
