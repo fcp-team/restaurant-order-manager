@@ -64,7 +64,6 @@ export class RepositorioPedido implements IRepositorioPedido {
       const idItens = pedido.Itens.map((item) => item.Id)
       if (idItens.length > 0) {
         const placeholders = idItens.map(() => "?").join(", ")
-        console.log("IDs: ", ...idItens)
 
         await conn.execute(
           `UPDATE ItensPedidos SET excluido = 1
@@ -75,7 +74,6 @@ export class RepositorioPedido implements IRepositorioPedido {
 
       for (const item of pedido.Itens) {
         if (!item.Id) {
-          console.log("ID do item: ", item.Id)
           const [res] = await conn.execute<ResultSetHeader>(
             `INSERT INTO ItensPedidos (id_pedido, id_item, quantidade, nota, status) VALUES (?, ?, ?, ?, ?)`,
             [pedido.Id, item.IdItemMenu, item.Quantidade, item.observacao ?? null, item.Status]

@@ -14,9 +14,8 @@ export async function PATCH(request: NextRequest) {
       { status: 400 }
     )
 
-    await servicoPedido.atualizarPedido(pedidoAtualizado)
-
-    return NextResponse.json({ message: "Pedido atualizado" })
+    const pedido = await servicoPedido.atualizarPedido(pedidoAtualizado)
+    return NextResponse.json(pedido)
 
   } catch (error) {
     console.error(error)

@@ -24,7 +24,6 @@ export default function Garcom() {
       }
 
       const data: PedidoDTO[] = await res.json()
-      // console.log(data)
       setPedidos(data)
 
     } catch (error) {

@@ -63,7 +63,8 @@ export default class ServicoPedido {
     if (payload.numeroMesa !== undefined)
       pedido.numeroMesa = payload.numeroMesa
     
-    if (payload.status !== undefined) { }
+    if (payload.status !== undefined)
+      pedido.alterarStatus(payload.status)
     
     if (payload.itensAdicionados !== undefined)
       await this.adicionarItens(pedido, payload.itensAdicionados)
@@ -73,8 +74,6 @@ export default class ServicoPedido {
     
     if (payload.itensAlterados !== undefined)
       await this.atualizarItens(pedido, payload.itensAlterados)
-
-    console.log(pedido)
 
     await this.repositorio.atualizarPedido(pedido)
     return pedido
@@ -117,8 +116,6 @@ export default class ServicoPedido {
     if (pedido.Itens.length === 0)
       throw new Error("Não há itens a serem atualizados no pedido")
 
-    console.log(itens)
-
     for (const item of itens) {
       if (!item.id) throw new Error("ID do item não informado")
       
@@ -145,26 +142,4 @@ export default class ServicoPedido {
     const pedidos = await this.repositorio.listarPorPeriodo(inicio, fim)
     return pedidos
   }
-
-  // async alterarStatusPedido(id: string, status: StatusPedido): Promise<Pedido> {
-  //   return await this.repositorio.atualizarStatusPedido(id, status)
-  // }
-
-  // async alterarStatusItem(idPedido: string, idItem: string, status: StatusItemPedido): Promise<Pedido> {
-  //   return await this.repositorio.atualizarStatusItem(idPedido, idItem, status)
-  // }
-
-  // async fecharPedido(id: string) {
-  //   const pedido = await this.buscarPedido(id)
-  //   pedido.fechar()
-
-  //   await this.repositorio.atualizarStatusPedido(id, StatusPedido.FECHADO)
-  // }
-
-  // async cancelarPedido(id: string) {
-  //   const pedido = await this.buscarPedido(id)
-  //   pedido.cancelar()
-
-  //   await this.repositorio.atualizarStatusPedido(id, StatusPedido.CANCELADO)
-  // }
 }

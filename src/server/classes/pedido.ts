@@ -74,14 +74,34 @@ export class Pedido {
       .reduce((ac, valor) => ac + valor, 0)
   }
 
-  fechar() {
+  alterarStatus(status: StatusPedido) {
+    if (!Object.values(StatusPedido).includes(status))
+      throw new Error("Status inválido para o pedido")
+
+    switch (status) {
+      case StatusPedido.FECHADO:
+        this.fechar()
+        break
+
+      case StatusPedido.CANCELADO:
+        this.cancelar()
+        break
+
+      case StatusPedido.ABERTO:
+        this.status = status
+        this.fechadoEm = undefined
+        break
+    }
+  }
+
+  private fechar() {
     this.assegurarPedidoAberto()
 
     this.status = StatusPedido.FECHADO
     this.fechadoEm = new Date()
   }
 
-  cancelar() {
+  private cancelar() {
     if (this.status === StatusPedido.FECHADO) {
       throw new Error("Pedidos fechados não podem ser cancelados")
     }

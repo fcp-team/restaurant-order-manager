@@ -1,4 +1,4 @@
-import { PedidoDTO } from "@/lib/dtos/pedido"
+import { PedidoAtualizadoDTO, PedidoDTO } from "@/lib/dtos/pedido"
 import { StatusPedido } from "@/lib/enums/status-pedido"
 
 type CardGarcomProps = {
@@ -17,14 +17,16 @@ export default function CardPedidoGarcom({
       return
     }
 
+    const pedidoAtualizado: PedidoAtualizadoDTO = {
+      id: pedido.id,
+      status: status
+    }
+
     try {
-      const res = await fetch("/api/pedido/atualizar-status", {
+      const res = await fetch("/api/pedido/atualizar", {
         method: 'PATCH',
         headers: { "Content-Type": 'application/json' },
-        body: JSON.stringify({
-          idPedido: pedido.id,
-          status: status
-        })
+        body: JSON.stringify(pedidoAtualizado)
       })
 
       if (!res.ok) {
