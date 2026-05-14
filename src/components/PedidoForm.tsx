@@ -149,6 +149,8 @@ export default function PedidoForm() {
       itens: itensPedido
     }
 
+    console.log(pedido)
+
     try {
       const res = await fetch("/api/pedido/criar", {
         method: "POST",

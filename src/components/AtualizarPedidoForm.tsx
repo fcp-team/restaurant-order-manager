@@ -186,19 +186,25 @@ export default function AtualizarPedidoForm({ pedido }: AtualizarPedidoFormProps
         !(item.id && itensRemovidos.includes(item.id)) &&
         !(novosItens.some((i) => i.idItemMenu === item.idItemMenu))
       ))
-      console.log(itensAlterados)
+      if (itensAlterados.length > 0) {
+        pedidoAtualizado.itensAlterados = itensAlterados.map((item) => ({
+          id: item.id!,
+          quantidade: item.quantidade,
+          observacao: item.observacao,
+        }))
+      }
 
-      // const res = await fetch("/api/pedido/atualizar", {
-      //   method: "PATCH",
-      //   headers: { "content-type": "application/json" },
-      //   body: JSON.stringify(pedidoAtualizado)
-      // })
+      const res = await fetch("/api/pedido/atualizar", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(pedidoAtualizado)
+      })
 
-      // if (!res.ok) {
-      //   throw new Error(`Erro ao atualizar pedido: ${res.statusText}`)
-      // }
+      if (!res.ok) {
+        throw new Error(`Erro ao atualizar pedido: ${res.statusText}`)
+      }
 
-      // alert("Pedido atualizado com sucesso!")
+      alert("Pedido atualizado com sucesso!")
     } catch (reason) {
       console.error(reason)
       alert("Houve um problema ao atualizar o pedido: " + (reason as Error).message)

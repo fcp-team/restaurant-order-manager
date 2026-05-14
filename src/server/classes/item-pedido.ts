@@ -35,18 +35,24 @@ export class ItemPedido {
     return this.precoUnitario * this.quantidade
   }
 
-  acrescentar(): void {
-    this.quantidade++
-  }
-
-  reduzir(): void {
-    if (this.quantidade <= 1) {
-      throw new Error("Quantidade não pode ser menor que 1")
+  atualizar(dados: {
+    quantidade?: number
+    observacao?: string
+    status?: StatusItemPedido
+  }) {
+    if (dados.quantidade !== undefined) {
+      if (dados.quantidade <= 0) throw new Error("Quantidade inválida")
+      this.quantidade = dados.quantidade
     }
-    this.quantidade--
+
+    if (dados.quantidade !== undefined)
+      this.observacao = dados.observacao
+
+    if (dados.status !== undefined)
+      this.status = dados.status
   }
 
-  alterarStatus(status: StatusItemPedido) {
-    this.status = status
-  }
+  // alterarStatus(status: StatusItemPedido) {
+  //   this.status = status
+  // }
 }

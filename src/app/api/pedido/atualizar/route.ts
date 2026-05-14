@@ -14,13 +14,7 @@ export async function PATCH(request: NextRequest) {
       { status: 400 }
     )
 
-    if (pedidoAtualizado.itensAdicionados !== undefined) {
-      await servicoPedido.adicionarItens(pedidoAtualizado.id, pedidoAtualizado.itensAdicionados)
-    }
-
-    if (pedidoAtualizado.itensRemovidos !== undefined) {
-      await servicoPedido.removerItens(pedidoAtualizado.id, pedidoAtualizado.itensRemovidos)
-    }
+    await servicoPedido.atualizarPedido(pedidoAtualizado)
 
     return NextResponse.json({ message: "Pedido atualizado" })
 

@@ -51,23 +51,17 @@ export class Pedido {
     this.itens = this.itens.filter(i => i.Id !== idItem)
   }
 
-  acrescentarItem(idItem: string) {
+  atualizarItem(
+    idItem: string,
+    dados: {
+      quantidade?: number
+      observacao?: string
+      status?: StatusItemPedido
+    }
+  ) {
     this.assegurarPedidoAberto()
-
     const item = this.pegarItem(idItem)
-    item.acrescentar()
-  }
-
-  reduzirItem(itemId: string) {
-    this.assegurarPedidoAberto()
-
-    const item = this.pegarItem(itemId)
-    item.reduzir()
-  }
-
-  alterarItemStatus(itemId: string, status: StatusItemPedido) {
-    const item = this.pegarItem(itemId)
-    item.alterarStatus(status)
+    item.atualizar(dados)
   }
 
   listarItensPorStatus(status: StatusItemPedido) {
