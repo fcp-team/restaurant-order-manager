@@ -6,14 +6,13 @@ import PedidoForm from "@/components/PedidoForm"
 import CardPedidoGarcom from "@/components/CardPedidoGarcom"
 import { getSocket } from "@/lib/ws-client"
 import { PedidoDTO } from "@/lib/dtos/pedido"
-import AtualizarPedidoForm from "@/components/AtualizarPedidoForm"
 import { StatusPedido } from "@/lib/enums/status-pedido"
 
 export default function Garcom() {
   const [mostrarFormulario, setMostrarFormulario] = useState<boolean>(false)
 
   const [pedidos, setPedidos] = useState<PedidoDTO[]>([])
-  const [pedidoAtual, setPedidoAtual] = useState<PedidoDTO | null>(null)
+  const [pedidoAtual, setPedidoAtual] = useState<PedidoDTO>()
 
   const pedidosAbertos = pedidos.filter((p) => p.status === StatusPedido.ABERTO)
   const pedidosFechados = pedidos.filter((p) => p.status === StatusPedido.FECHADO)
@@ -67,9 +66,9 @@ export default function Garcom() {
     return () => { socket.onmessage = null }
   }, [])
 
-  function handleUpdate(pedido: PedidoDTO) {
+  function handleFormState(pedido?: PedidoDTO) {
     setPedidoAtual(pedido)
-    setMostrarFormulario(true)
+    setMostrarFormulario(!mostrarFormulario)
   }
 
   return (
@@ -80,16 +79,15 @@ export default function Garcom() {
         {mostrarFormulario ?
           (
             <>
-              {pedidoAtual ? <AtualizarPedidoForm pedido={pedidoAtual} /> : <PedidoForm />}
+              <PedidoForm pedido={pedidoAtual} />
               <button
                 type="button"
-                onClick={() => setMostrarFormulario(false)}
+                onClick={() => handleFormState()}
                 className="w-full max-w-lg p-2 px-5 border-2 rounded-2xl border-(--color-button-action-border) mt-4 bg-(--color-button-action) cursor-pointer"
               >
                 Voltar
               </button>
             </>
-
           ) :
           (
             <>
@@ -110,7 +108,7 @@ export default function Garcom() {
                     <CardPedidoGarcom
                       key={pedido.id}
                       pedido={pedido}
-                      atualizarPedidoFn={() => handleUpdate(pedido)}
+                      atualizarPedidoFn={() => handleFormState(pedido)}
                     />
                   ))
                 )}
@@ -125,7 +123,7 @@ export default function Garcom() {
                     <CardPedidoGarcom
                       key={pedido.id}
                       pedido={pedido}
-                      atualizarPedidoFn={() => handleUpdate(pedido)}
+                      atualizarPedidoFn={() => handleFormState(pedido)}
                     />
                   ))
                 )}
@@ -140,7 +138,7 @@ export default function Garcom() {
                     <CardPedidoGarcom
                       key={pedido.id}
                       pedido={pedido}
-                      atualizarPedidoFn={() => handleUpdate(pedido)}
+                      atualizarPedidoFn={() => handleFormState(pedido)}
                     />
                   ))
                 )}
