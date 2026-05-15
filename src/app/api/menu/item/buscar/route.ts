@@ -17,7 +17,7 @@ export async function GET(request: Request) {
       )
     }
 
-    const item = await servicoMenu.buscarItem(idMenu, idItem)
+    const item = await servicoMenu.buscarItem(idItem)
     return NextResponse.json(item)
 
   } catch (reason) {
