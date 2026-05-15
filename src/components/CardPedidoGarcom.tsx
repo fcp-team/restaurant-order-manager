@@ -1,5 +1,32 @@
 import { PedidoAtualizadoDTO, PedidoDTO } from "@/lib/dtos/pedido"
+import { StatusItemPedido } from "@/lib/enums/status-item-pedido"
 import { StatusPedido } from "@/lib/enums/status-pedido"
+
+function definirCorStatusPedido(status: StatusPedido) {
+  switch (status) {
+    case StatusPedido.ABERTO:
+      return "green-400"
+
+    case StatusPedido.FECHADO:
+      return "blue-400"
+
+    case StatusPedido.CANCELADO:
+      return "red-400"
+  }
+}
+
+function corStatusItemPedido(status: StatusItemPedido) {
+  switch (status) {
+    case StatusItemPedido.PENDENTE:
+      return "gray-400"
+
+    case StatusItemPedido.PREPARANDO:
+      return "yellow-400"
+
+    case StatusItemPedido.PRONTO:
+      return "green-400"
+  }
+}
 
 type CardGarcomProps = {
   pedido: PedidoDTO
@@ -10,6 +37,7 @@ export default function CardPedidoGarcom({
   pedido,
   atualizarPedidoFn
 }: CardGarcomProps) {
+  const corStatusPedido = definirCorStatusPedido(pedido.status)
 
   async function alterarStatus(status: StatusPedido) {
     if (!Object.values(StatusPedido).includes(status)) {
@@ -40,14 +68,20 @@ export default function CardPedidoGarcom({
 
   return (
     <div className="w-full max-w-md bg-(--color-surface) border-(--color-surface-border) border-2 flex flex-col gap-4 rounded-2xl p-4">
-      <h3 className="text-2xl font-bold">Pedido n°{pedido.id} - Mesa {pedido.numeroMesa}</h3>
+      <div>
+        <span className="text-2xl font-bold">
+          Pedido n°{pedido.id} - Mesa {pedido.numeroMesa}
+        </span>
+        <span className={`float-right px-3 py-1 rounded-full bg-${corStatusPedido}`}>
+          {pedido.status}
+        </span>
+      </div>
 
       <p>
         Data de criação: {Intl.DateTimeFormat("pt-BR", {
           dateStyle: "short"
         }).format(new Date(pedido.criadoEm || Date.now()))}
       </p>
-      <p>Status: {pedido.status}</p>
 
       <ul className="flex flex-col gap-1 text-lg list-disc list-inside rounded-lg bg-white">
         {pedido.itens.map((item, index) => (
@@ -57,14 +91,17 @@ export default function CardPedidoGarcom({
           >
             <span>{item.nome}</span>
             <span className="float-right">
-              &times;{item.quantidade} | {item.status}
+              &times;{item.quantidade}
+              <span className={`px-3 py-1 rounded-full ml-3 text-[1rem] bg-${corStatusItemPedido(item.status)}`}>
+                {item.status}
+              </span>
             </span>
           </li>
         ))}
       </ul>
 
-      <p>
-        Total: {Intl.NumberFormat("pt-br", {
+      <p className="text-xl text-right">
+        <strong>Total:</strong> {Intl.NumberFormat("pt-br", {
           style: "currency",
           currency: "BRL"
         }).format(pedido.itens.reduce((acc, item) => (

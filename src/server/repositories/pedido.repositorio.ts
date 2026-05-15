@@ -30,7 +30,7 @@ export class RepositorioPedido implements IRepositorioPedido {
       for (const item of pedido.Itens) {
         const [r] = await conn.execute<ResultSetHeader>(
           `INSERT INTO ItensPedidos (id_pedido, id_item, quantidade, nota, status) VALUES (?, ?, ?, ?, ?)`,
-          [idPedido, item.IdItemMenu, item.Quantidade, item.observacao ?? null, "preparando"]
+          [idPedido, item.IdItemMenu, item.Quantidade, item.observacao ?? null, item.Status]
         )
 
         const idItemPedido = r.insertId

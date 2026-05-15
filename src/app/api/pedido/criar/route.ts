@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { RepositorioPedido } from "@/server/repositories/pedido.repositorio"
 import ServicoPedido from "@/server/services/pedido.servico"
+import broadcast from "@/lib/broadcast"
 
 const servicoPedido = new ServicoPedido(new RepositorioPedido())
 
@@ -17,13 +18,7 @@ export async function POST(request: Request) {
 
     const pedido = await servicoPedido.criarPedido(novoPedido)
 
-    await fetch("http://localhost:3000/ws/broadcast", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ type: "pedido:criar", payload: pedido })
-    })
+    await broadcast("pedido:criar", pedido)
 
     return NextResponse.json(pedido)
 

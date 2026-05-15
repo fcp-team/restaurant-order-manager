@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import ServicoPedido from "@/server/services/pedido.servico";
 import { RepositorioPedido } from "@/server/repositories/pedido.repositorio";
 import { PedidoAtualizadoDTO } from "@/lib/dtos/pedido";
+import broadcast from "@/lib/broadcast";
 
 const servicoPedido = new ServicoPedido(new RepositorioPedido())
 
@@ -15,6 +16,9 @@ export async function PATCH(request: NextRequest) {
     )
 
     const pedido = await servicoPedido.atualizarPedido(pedidoAtualizado)
+
+    await broadcast("pedido:atualizar", pedido)
+
     return NextResponse.json(pedido)
 
   } catch (error) {
