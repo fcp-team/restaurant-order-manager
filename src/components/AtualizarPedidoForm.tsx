@@ -24,7 +24,6 @@ function Cardapio({
   itensSelecionados,
   onRemoveItem
 }: CardapioProps) {
-  const [menus, setMenus] = useState<MenuDTO[]>([])
   const [itensMenu, setItensMenu] = useState<ItemMenuDTO[]>([])
 
   const [itensFiltrados, setItensFiltrados] = useState<ItemMenuDTO[]>([])
@@ -39,7 +38,6 @@ function Cardapio({
           menu.itens.map(item => ({ ...item, idMenu: menu.id }))
         ))
 
-        setMenus(data)
         setItensMenu(itens)
       })
   }, [])
@@ -69,7 +67,7 @@ function Cardapio({
         className="w-full max-w-lg border border-gray-400 rounded-lg p-3 mb-4 bg-white"
       />
 
-      <ul className="flex flex-col gap-px w-full max-h-[60dvh] overflow-auto rounded-2xl bg-gray-500 shadow">
+      <ul className="flex flex-col gap-px w-full max-w-lg max-h-[60dvh] overflow-auto rounded-2xl bg-gray-500 shadow">
         {itensFiltrados.map((item, index) => (
           <li
             key={index}
@@ -231,7 +229,7 @@ export default function AtualizarPedidoForm({ pedido }: AtualizarPedidoFormProps
         />
 
         {itensPedido.length > 0 && (
-          <ul className="flex flex-col gap-px w-full overflow-hidden rounded-2xl bg-gray-500 shadow">
+          <ul className="flex flex-col gap-px w-full max-w-lg overflow-hidden rounded-2xl bg-gray-500 shadow">
             {itensPedido.map((item, index) => (
               <li
                 key={index}

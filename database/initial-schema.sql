@@ -114,7 +114,7 @@ CREATE TABLE ItensPedidos (
     id_item INT NOT NULL,
     quantidade INT NOT NULL,
     nota VARCHAR(255),
-    status ENUM('PENDENTE','PREPARANDO','PRONTO') NOT NULL DEFAULT 'PREPARANDO',
+    status ENUM('PENDENTE','PREPARANDO','PRONTO') NOT NULL DEFAULT 'PENDENTE',
     excluido TINYINT(1) NOT NULL DEFAULT 0,
     CHECK (excluido IN (0,1)),
 

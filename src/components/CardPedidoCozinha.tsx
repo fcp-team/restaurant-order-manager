@@ -1,6 +1,19 @@
 import { ItemPedidoDTO, PedidoAtualizadoDTO, PedidoDTO } from "@/lib/dtos/pedido";
 import { StatusItemPedido } from "@/lib/enums/status-item-pedido";
-import { useState, useEffect } from "react"
+import { useState } from "react"
+
+function corStatusItemPedido(status: StatusItemPedido) {
+  switch (status) {
+    case StatusItemPedido.PENDENTE:
+      return "gray-400"
+
+    case StatusItemPedido.PREPARANDO:
+      return "yellow-400"
+
+    case StatusItemPedido.PRONTO:
+      return "green-400"
+  }
+}
 
 type CardCozinhaProps = {
   pedido: PedidoDTO
@@ -10,8 +23,6 @@ export default function CardPedidoCozinha({ pedido }: CardCozinhaProps) {
   const [itens, setItens] = useState<ItemPedidoDTO[]>([...pedido.itens]);
 
   async function alterarStatus(idItem: string, status: StatusItemPedido) {
-    // const item = itens.find((item) => item.id === idItem)
-
     let novoStatus = status
     switch (status) {
       case StatusItemPedido.PENDENTE:
@@ -56,7 +67,7 @@ export default function CardPedidoCozinha({ pedido }: CardCozinhaProps) {
   }
 
   return (
-    <div className="w-max max-w-md bg-(--color-surface) border-(--color-surface-border) border-2 flex flex-col gap-4 rounded-2xl p-4">
+    <div className="w-full max-w-md bg-(--color-surface) border-(--color-surface-border) border-2 flex flex-col gap-4 rounded-2xl p-4">
       <h3 className="text-2xl font-bold">Pedido n°{pedido.id} - Mesa {pedido.numeroMesa}</h3>
 
       <p>
@@ -82,7 +93,7 @@ export default function CardPedidoCozinha({ pedido }: CardCozinhaProps) {
               <button
                 type="button"
                 onClick={() => alterarStatus(item.id, item.status)}
-                className="text-[1rem] px-3 py-1 border-2 rounded-full cursor-pointer bg-(--color-button-action) transition duration-300 hover:bg-(--color-button-action-hover) border-(--color-button-action-border)"
+                className={`text-[1rem] px-3 py-1 border-2 rounded-full cursor-pointer bg-${corStatusItemPedido(item.status)} transition duration-300 hover:bg-(--color-button-action-hover) border-(--color-button-action-border)`}
               >
                 {item.status}
               </button>

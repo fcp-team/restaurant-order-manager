@@ -57,7 +57,7 @@ function Cardapio({
         className="w-full max-w-lg border border-gray-400 rounded-lg p-3 mb-4 bg-white"
       />
 
-      <ul className="flex flex-col gap-px w-full max-h-[60dvh] overflow-auto rounded-2xl bg-gray-500 shadow">
+      <ul className="flex flex-col gap-px w-full max-w-lg max-h-[60dvh] overflow-auto rounded-2xl bg-gray-500 shadow">
         {itensFiltrados.map((item, index) => (
           <li
             key={index}
@@ -191,7 +191,7 @@ export default function PedidoForm() {
         />
 
         {itensSelecionados.length > 0 && (
-          <ul className="flex flex-col gap-px w-full overflow-hidden rounded-2xl bg-gray-500 shadow">
+          <ul className="flex flex-col gap-px w-full max-w-lg overflow-hidden rounded-2xl bg-gray-500 shadow">
             {itensSelecionados.map((item, index) => (
               <li
                 key={index}
