@@ -5,13 +5,13 @@ import { useState } from "react"
 function corStatusItemPedido(status: StatusItemPedido) {
   switch (status) {
     case StatusItemPedido.PENDENTE:
-      return "gray-400"
+      return "bg-gray-400"
 
     case StatusItemPedido.PREPARANDO:
-      return "yellow-400"
+      return "bg-yellow-400"
 
     case StatusItemPedido.PRONTO:
-      return "green-400"
+      return "bg-green-400"
   }
 }
 
@@ -93,7 +93,7 @@ export default function CardPedidoCozinha({ pedido }: CardCozinhaProps) {
               <button
                 type="button"
                 onClick={() => alterarStatus(item.id, item.status)}
-                className={`text-[1rem] px-3 py-1 border-2 rounded-full cursor-pointer bg-${corStatusItemPedido(item.status)} transition duration-300 hover:bg-(--color-button-action-hover) border-(--color-button-action-border)`}
+                className={`text-[1rem] px-3 py-1 border-2 rounded-full cursor-pointer ${corStatusItemPedido(item.status)} transition duration-300 hover:bg-(--color-button-action-hover) border-(--color-button-action-border)`}
               >
                 {item.status}
               </button>

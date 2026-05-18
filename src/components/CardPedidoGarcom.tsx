@@ -2,32 +2,6 @@ import { PedidoAtualizadoDTO, PedidoDTO } from "@/lib/dtos/pedido"
 import { StatusItemPedido } from "@/lib/enums/status-item-pedido"
 import { StatusPedido } from "@/lib/enums/status-pedido"
 
-function definirCorStatusPedido(status: StatusPedido) {
-  switch (status) {
-    case StatusPedido.ABERTO:
-      return "green-400"
-
-    case StatusPedido.FECHADO:
-      return "blue-400"
-
-    case StatusPedido.CANCELADO:
-      return "red-400"
-  }
-}
-
-function corStatusItemPedido(status: StatusItemPedido) {
-  switch (status) {
-    case StatusItemPedido.PENDENTE:
-      return "gray-400"
-
-    case StatusItemPedido.PREPARANDO:
-      return "yellow-400"
-
-    case StatusItemPedido.PRONTO:
-      return "green-400"
-  }
-}
-
 type CardGarcomProps = {
   pedido: PedidoDTO
   atualizarPedidoFn: () => void
@@ -37,6 +11,32 @@ export default function CardPedidoGarcom({
   pedido,
   atualizarPedidoFn
 }: CardGarcomProps) {
+  function definirCorStatusPedido(status: StatusPedido) {
+    switch (status) {
+      case StatusPedido.ABERTO:
+        return "bg-green-400"
+
+      case StatusPedido.FECHADO:
+        return "bg-blue-400"
+
+      case StatusPedido.CANCELADO:
+        return "bg-red-400"
+    }
+  }
+
+  function corStatusItemPedido(status: StatusItemPedido) {
+    switch (status) {
+      case StatusItemPedido.PENDENTE:
+        return "bg-gray-400"
+
+      case StatusItemPedido.PREPARANDO:
+        return "bg-yellow-400"
+
+      case StatusItemPedido.PRONTO:
+        return "bg-green-400"
+    }
+  }
+
   const corStatusPedido = definirCorStatusPedido(pedido.status)
 
   async function alterarStatus(status: StatusPedido) {
@@ -72,7 +72,7 @@ export default function CardPedidoGarcom({
         <span className="text-2xl font-bold">
           Pedido n°{pedido.id} - Mesa {pedido.numeroMesa}
         </span>
-        <span className={`float-right px-3 py-1 rounded-full bg-${corStatusPedido}`}>
+        <span className={`float-right px-3 py-1 rounded-full ${corStatusPedido}`}>
           {pedido.status}
         </span>
       </div>
@@ -92,7 +92,7 @@ export default function CardPedidoGarcom({
             <span>{item.nome}</span>
             <span className="float-right">
               &times;{item.quantidade}
-              <span className={`px-3 py-1 rounded-full ml-3 text-[1rem] bg-${corStatusItemPedido(item.status)}`}>
+              <span className={`px-3 py-1 rounded-full ml-3 text-[1rem] ${corStatusItemPedido(item.status)}`}>
                 {item.status}
               </span>
             </span>
