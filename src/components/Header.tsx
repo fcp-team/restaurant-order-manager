@@ -57,7 +57,7 @@ function OpcoesModal({ closeSettingsFn }: { closeSettingsFn: () => void }) {
 
         <div className="space-y-3">
           <Link
-            href="#"
+            href="admin/configuracoes"
             className="block w-full px-4 py-3 text-center bg-(--color-button-action) text-(--color-text-primary) rounded-md font-medium hover:bg-(--color-button-action-hover) transition-colors cursor-pointer border-2 border-(--color-button-action-border)"
           >
             Editar perfil
